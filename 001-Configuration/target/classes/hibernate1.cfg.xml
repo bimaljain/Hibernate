@@ -1,0 +1,24 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/bj</property>
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.connection.password">luvondrox</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+		
+		<!-- Optional Properties -->
+		<property name="show_sql">true</property>
+		<property name="hbm2ddl.auto">update</property>
+		<!--  C3P0 Connection Pool -->
+<!-- 		<property name="hibernate.c3p0.max_size">30</property> -->
+<!-- 		<property name="hibernate.c3p0.min_size">21</property> -->
+<!-- 		<property name="hibernate.c3p0.timeout">1800</property> -->
+<!-- 		<property name="hibernate.c3p0.acquire_increment">2</property> -->
+
+		<mapping resource="001_Emp.hbm.xml" />
+	</session-factory>
+</hibernate-configuration>

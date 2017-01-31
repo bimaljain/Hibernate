@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="_001._001_Emp" table="EMP">
+		<id name="eid" type="integer" column="ENO">
+			<generator class="increment" />
+		</id>
+		<property name="name" column="ENAME" />
+		<property name="address" column="EADDRESS" />
+		<property name="salary" column="ESALARY" />
+	</class>
+</hibernate-mapping>
+
+<!-- 
+create table EMP(
+	eNo number(3) primary key,
+	ename varchar(20),
+	eaddress varchar(20),
+	esalary number(7,2)
+);
+ -->
