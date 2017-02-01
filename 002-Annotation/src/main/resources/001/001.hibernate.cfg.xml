@@ -1,0 +1,17 @@
+<!DOCTYPE hibernate-configuration PUBLIC
+	"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+	<session-factory>
+		<!-- Oracle DataSource -->
+		<property name="hibernate.connection.driver_class">oracle.jdbc.driver.OracleDriver</property>
+		<property name="hibernate.connection.url">jdbc:oracle:thin:@127.0.0.1:1521:XE</property>
+		<property name="hibernate.connection.username">SYSTEM</property>
+		<property name="hibernate.connection.password">luvondrox</property>
+		<property name="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</property>
+		<property name="show_sql">true</property>
+		<!-- mapping tag instructs hibernate to perform mapping for mentioned resources(in case of XML Mapping) or classes(in case of Annotation mapping). -->
+		<mapping class="_001._001Emp"/>
+	</session-factory>
+</hibernate-configuration>
