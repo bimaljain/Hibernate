@@ -10,9 +10,6 @@
 		<property name="hibernate.connection.password">luvondrox</property>
 		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
 		<property name="show_sql">true</property>
-		<!-- Second level cache -->
-		<property name="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</property>
-		<property name="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>
-		<mapping class="_001._020Emp"/>
+		<mapping class="_001._000Emp"/>
 	</session-factory>
 </hibernate-configuration>

@@ -1,22 +1,4 @@
-/* 
----------
-IDENTITY:
---------- 
-Use MySQL DB. 
-The IDENTITY type is supported by MySQL but not by ORACLE. 
-GenerationType.IDENTITY will use AUTO_INCREMENT
 
-drop table EMP;
-
-CREATE TABLE EMP (
-  ENO INT NOT NULL AUTO_INCREMENT,
-  ENAME VARCHAR(15) NOT NULL,
-  EADDRESS VARCHAR(100) NOT NULL,
-  ESALARY INT,
-  PRIMARY KEY (ENO)
-)
-
-*/
 
 package _001;
 
@@ -33,11 +15,14 @@ import javax.persistence.Table;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.cfg.Configuration;
 
 @Entity
 @Table(name="EMP")
-class _019Emp{
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+class _004Emp{
 	
 	@Id
 	@Column(name = "ENO")
@@ -53,9 +38,9 @@ class _019Emp{
 	@Column(name = "ESALARY")
 	double salary;
 	
-	public _019Emp() {	}
+	public _004Emp() {	}
 
-	public _019Emp(String name, String address, double salary) {
+	public _004Emp(String name, String address, double salary) {
 		this.name = name;
 		this.address = address;
 		this.salary = salary;	}
@@ -77,15 +62,15 @@ class _019Emp{
 	}
 }
 
-public class _019_NoCache {	
+public class _004_QueryCache {	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws IOException {
-		Configuration cfg = new Configuration().configure("001/019.hibernate.cfg.xml");
+		Configuration cfg = new Configuration().configure("004.hibernate.cfg.xml");
 		SessionFactory sf = cfg.buildSessionFactory();
 		System.out.println("1-Session");
 		Session session = sf.openSession();
 		Transaction tx = session.beginTransaction();
-		_019Emp emp1 = new _019Emp("Bimal","Pune",23456);
+		_004Emp emp1 = new _004Emp("Bimal","Pune",23456);
 		session.save(emp1);
 		tx.commit();
 		session.close();
@@ -93,7 +78,7 @@ public class _019_NoCache {
 		System.out.println("2-Session");
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		List<_019Emp> employees = (List<_019Emp>)session.createQuery(" FROM _019Emp").list();
+		List<_004Emp> employees = (List<_004Emp>)session.createQuery(" FROM _004Emp where id=1").setCacheable(true).list();
 		System.out.println(employees);
 		tx.commit();
 		session.close();
@@ -101,7 +86,7 @@ public class _019_NoCache {
 		System.out.println("3-Session");
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		employees = (List<_019Emp>)session.createQuery(" FROM _019Emp").list();
+		employees = (List<_004Emp>)session.createQuery(" FROM _004Emp  where id=1").setCacheable(true).list();
 		employees.get(employees.size()-1).setName("BJ");
 		System.out.println(employees);
 		tx.commit();
@@ -110,7 +95,7 @@ public class _019_NoCache {
 		System.out.println("4-Session");
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		employees = (List<_019Emp>)session.createQuery(" FROM _019Emp").list();
+		employees = (List<_004Emp>)session.createQuery(" FROM _004Emp  where id=1").setCacheable(true).list();
 		System.out.println(employees);
 		tx.commit();
 		session.close();
@@ -122,16 +107,13 @@ public class _019_NoCache {
 	Hibernate: insert into EMP (EADDRESS, ENAME, ESALARY) values (?, ?, ?)
 	
 	2-Session
-	Hibernate: select emp0_.ENO as ENO1_0_, emp0_.EADDRESS as EADDRESS2_0_, emp0_.ENAME as ENAME3_0_, emp0_.ESALARY as ESALARY4_0_ from EMP emp0_
-	[1 Bimal Pune 23456.0]
+	Hibernate: select emp0_.ENO as ENO1_0_, emp0_.EADDRESS as EADDRESS2_0_, emp0_.ENAME as ENAME3_0_, emp0_.ESALARY as ESALARY4_0_ from EMP emp0_ where emp0_.ENO=1
+	[1 BJ Pune 23456.0]
 	
 	3-Session
-	Hibernate: select emp0_.ENO as ENO1_0_, emp0_.EADDRESS as EADDRESS2_0_, emp0_.ENAME as ENAME3_0_, emp0_.ESALARY as ESALARY4_0_ from EMP emp0_
 	[1 BJ Pune 23456.0]
-	Hibernate: update EMP set EADDRESS=?, ENAME=?, ESALARY=? where ENO=?
 	
 	4-Session
-	Hibernate: select emp0_.ENO as ENO1_0_, emp0_.EADDRESS as EADDRESS2_0_, emp0_.ENAME as ENAME3_0_, emp0_.ESALARY as ESALARY4_0_ from EMP emp0_
 	[1 BJ Pune 23456.0]
 	 */
 }

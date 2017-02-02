@@ -1,23 +1,22 @@
-/* 
----------
-IDENTITY:
---------- 
-Use MySQL DB. 
-The IDENTITY type is supported by MySQL but not by ORACLE. 
-GenerationType.IDENTITY will use AUTO_INCREMENT
+/*
+1. To use the query cache, you must first activate it using the hibernate.cache.use_query_cache="true" property in the configuration file. By setting this property to true, you make Hibernate create the necessary caches in memory to hold the query and identifier sets.
+2. Next, to use the query cache, you use the setCacheable(true) method of the Query class.
+3. Hibernate also supports very fine-grained cache support through the concept of a cache region. A cache region is part of the cache that's given a name.
+4. The above code uses the method to tell Hibernate to store and look for the query in the employee area of the cache.
 
-drop table EMP;
+Query Cache:
+1. If we use query instead of using session.get(), hibernate treats queries differently. So simply configuring 2nd level cache will not get the desired caching. You have to enable query cache.
+2. Query level cache is different from 2nd level cache. So there are 3 different caches in hibernate.
+3. In order to use query cache:
+Include cache provider jar into your project
+Enable query cache in hibernate configuration file
+Make EVERY query cacheable (not just the first query)
+4. Query.setCacheable() performs 2 roles:
+· If the query cache does not have value, go to the DB, pull up the records and set it in the query cache.
 
-CREATE TABLE EMP (
-  ENO INT NOT NULL AUTO_INCREMENT,
-  ENAME VARCHAR(15) NOT NULL,
-  EADDRESS VARCHAR(100) NOT NULL,
-  ESALARY INT,
-  PRIMARY KEY (ENO)
-)
+If the query cache does have value, pull up the records from the query cache.
 
-*/
-
+ */
 package _001;
 
 import java.io.IOException;
@@ -33,11 +32,14 @@ import javax.persistence.Table;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.cfg.Configuration;
 
 @Entity
 @Table(name="EMP")
-class _019Emp{
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+class _003Emp{
 	
 	@Id
 	@Column(name = "ENO")
@@ -53,9 +55,9 @@ class _019Emp{
 	@Column(name = "ESALARY")
 	double salary;
 	
-	public _019Emp() {	}
+	public _003Emp() {	}
 
-	public _019Emp(String name, String address, double salary) {
+	public _003Emp(String name, String address, double salary) {
 		this.name = name;
 		this.address = address;
 		this.salary = salary;	}
@@ -77,15 +79,15 @@ class _019Emp{
 	}
 }
 
-public class _021_QueryCache {	
+public class _003_QueryCache {	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws IOException {
-		Configuration cfg = new Configuration().configure("001/019.hibernate.cfg.xml");
+		Configuration cfg = new Configuration().configure("003.hibernate.cfg.xml");
 		SessionFactory sf = cfg.buildSessionFactory();
 		System.out.println("1-Session");
 		Session session = sf.openSession();
 		Transaction tx = session.beginTransaction();
-		_019Emp emp1 = new _019Emp("Bimal","Pune",23456);
+		_003Emp emp1 = new _003Emp("Bimal","Pune",23456);
 		session.save(emp1);
 		tx.commit();
 		session.close();
@@ -93,7 +95,7 @@ public class _021_QueryCache {
 		System.out.println("2-Session");
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		List<_019Emp> employees = (List<_019Emp>)session.createQuery(" FROM _019Emp").list();
+		List<_003Emp> employees = (List<_003Emp>)session.createQuery(" FROM _003Emp  where id=1").list();
 		System.out.println(employees);
 		tx.commit();
 		session.close();
@@ -101,7 +103,7 @@ public class _021_QueryCache {
 		System.out.println("3-Session");
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		employees = (List<_019Emp>)session.createQuery(" FROM _019Emp").list();
+		employees = (List<_003Emp>)session.createQuery(" FROM _003Emp where id=1").list();
 		employees.get(employees.size()-1).setName("BJ");
 		System.out.println(employees);
 		tx.commit();
@@ -110,7 +112,7 @@ public class _021_QueryCache {
 		System.out.println("4-Session");
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		employees = (List<_019Emp>)session.createQuery(" FROM _019Emp").list();
+		employees = (List<_003Emp>)session.createQuery(" FROM _003Emp where id=1").list();
 		System.out.println(employees);
 		tx.commit();
 		session.close();

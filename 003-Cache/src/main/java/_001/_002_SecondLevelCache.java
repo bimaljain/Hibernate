@@ -1,27 +1,7 @@
-/* 
----------
-IDENTITY:
---------- 
-Use MySQL DB. 
-The IDENTITY type is supported by MySQL but not by ORACLE. 
-GenerationType.IDENTITY will use AUTO_INCREMENT
-
-drop table EMP;
-
-CREATE TABLE EMP (
-  ENO INT NOT NULL AUTO_INCREMENT,
-  ENAME VARCHAR(15) NOT NULL,
-  EADDRESS VARCHAR(100) NOT NULL,
-  ESALARY INT,
-  PRIMARY KEY (ENO)
-)
-
-*/
 
 package _001;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,8 +19,10 @@ import org.hibernate.cfg.Configuration;
 
 @Entity
 @Table(name="EMP")
+//If we are going to use second-level caching for Employee class, let us add the mapping element required to tell Hibernate to cache Employee 
+//instances using read-write strategy.
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-class _020Emp{
+class _002Emp{
 	
 	@Id
 	@Column(name = "ENO")
@@ -56,9 +38,9 @@ class _020Emp{
 	@Column(name = "ESALARY")
 	double salary;
 	
-	public _020Emp() {	}
+	public _002Emp() {	}
 
-	public _020Emp(String name, String address, double salary) {
+	public _002Emp(String name, String address, double salary) {
 		this.name = name;
 		this.address = address;
 		this.salary = salary;	}
@@ -80,15 +62,15 @@ class _020Emp{
 	}
 }
 
-public class _020_SecondLevelCache {	
+public class _002_SecondLevelCache {	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws IOException {
-		Configuration cfg = new Configuration().configure("001/020.hibernate.cfg.xml");
+		Configuration cfg = new Configuration().configure("002.hibernate.cfg.xml");
 		SessionFactory sf = cfg.buildSessionFactory();
 		System.out.println("1-Session");
 		Session session = sf.openSession();
 		Transaction tx = session.beginTransaction();
-		_020Emp emp1 = new _020Emp("Bimal","Pune",23456);
+		_002Emp emp1 = new _002Emp("Bimal","Pune",23456);
 		session.save(emp1);
 		tx.commit();
 		session.close();
@@ -96,7 +78,7 @@ public class _020_SecondLevelCache {
 		System.out.println("2-Session");
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		List<_020Emp> employees = (List<_020Emp>)session.createQuery(" FROM _020Emp").list();
+		_002Emp employees=(_002Emp)session.get(_002Emp.class, new Integer(1));
 		System.out.println(employees);
 		tx.commit();
 		session.close();
@@ -104,8 +86,8 @@ public class _020_SecondLevelCache {
 		System.out.println("3-Session");
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		employees = (List<_020Emp>)session.createQuery(" FROM _020Emp").list();
-		employees.get(employees.size()-1).setName("BJ");
+		employees=(_002Emp)session.get(_002Emp.class, new Integer(1));
+		employees.setName("BJ");
 		System.out.println(employees);
 		tx.commit();
 		session.close();
@@ -113,7 +95,7 @@ public class _020_SecondLevelCache {
 		System.out.println("4-Session");
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		employees = (List<_020Emp>)session.createQuery(" FROM _020Emp").list();
+		employees=(_002Emp)session.get(_002Emp.class, new Integer(1));
 		System.out.println(employees);
 		tx.commit();
 		session.close();
@@ -125,16 +107,13 @@ public class _020_SecondLevelCache {
 	Hibernate: insert into EMP (EADDRESS, ENAME, ESALARY) values (?, ?, ?)
 	
 	2-Session
-	Hibernate: select emp0_.ENO as ENO1_0_, emp0_.EADDRESS as EADDRESS2_0_, emp0_.ENAME as ENAME3_0_, emp0_.ESALARY as ESALARY4_0_ from EMP emp0_
-	[1 Bimal Pune 23456.0]
+	Hibernate: select emp0_.ENO as ENO1_0_0_, emp0_.EADDRESS as EADDRESS2_0_0_, emp0_.ENAME as ENAME3_0_0_, emp0_.ESALARY as ESALARY4_0_0_ from EMP emp0_ where emp0_.ENO=?
+	1 Bimal Pune 23456.0
 	
 	3-Session
-	Hibernate: select emp0_.ENO as ENO1_0_, emp0_.EADDRESS as EADDRESS2_0_, emp0_.ENAME as ENAME3_0_, emp0_.ESALARY as ESALARY4_0_ from EMP emp0_
-	[1 BJ Pune 23456.0]
-	Hibernate: update EMP set EADDRESS=?, ENAME=?, ESALARY=? where ENO=?
+	1 BJ Pune 23456.0
 	
 	4-Session
-	Hibernate: select emp0_.ENO as ENO1_0_, emp0_.EADDRESS as EADDRESS2_0_, emp0_.ENAME as ENAME3_0_, emp0_.ESALARY as ESALARY4_0_ from EMP emp0_
-	[1 BJ Pune 23456.0]
+	1 BJ Pune 23456.0
 	 */
 }
