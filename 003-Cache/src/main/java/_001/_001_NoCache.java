@@ -1,48 +1,57 @@
-/* 
-Hibernate Caching
+/*
+------------------
+Hibernate Caching:
+------------------
 Caching is all about application performance optimization and it sits between your application and the database to avoid the number of database hits as 
 much as possible to give a better performance. Caching is important to Hibernate as well which utilizes a multilevel caching schemes as explained below:
 
-First-level cache: The first-level cache is the Session cache and is a mandatory cache through which all requests must pass. The Session cache keeps an 
-object under its own power before committing it to the database. If you issue multiple updates to an object, Hibernate tries to delay doing the update 
-as long as possible to reduce the number of update SQL statements issued. If you close the session, all the objects being cached are lost and either 
-persisted or updated in the database.
-Second-level cache: Second level cache is an optional cache and first-level cache will always be consulted before any attempt is made to locate an 
-object in the second-level cache. The second-level cache can be configured on a per-class and per-collection basis and mainly responsible for caching 
-objects across sessions. 
+First-level cache: 
+The first-level cache is the Session cache and is a mandatory cache through which all requests must pass. The Session cache keeps an object under its 
+own power before committing it to the database. If you issue multiple updates to an object, Hibernate tries to delay doing the update as long as possible 
+to reduce the number of update SQL statements issued. If you close the session, all the objects being cached are lost and either persisted or updated in 
+the database.
 
-Any third-party cache can be used with Hibernate. An org.hibernate.cache.CacheProvider interface is provided, which must be implemented to provide 
-Hibernate with a handle to the cache implementation.
+Second Level Cache:
+1. In the first level cache or session cache, the objects are cached as long as the session is not closed. If we want the same object again in some other 
+session, we have to load it again in the cache. What if we need some object across multiple session. Second level of cache to the rescue. It provides data:
+- Across sessions in an application
+- Across applications (provided they are all talking to the same data & all are using hibernate)
+- Across clusters (provided they are all talking to the same data & all are using hibernate)
+If any application is not using hibernate, it will not be aware of the cache data and will directly talk to DB and dirtying the data. This will make 
+hibernate cache invalid, as hibernate would not know about this change. But if we are configuring 2nd level cache across applications, hibernate will take 
+care of these issues.
 
-Query-level cache: Hibernate also implements a cache for query resultsets that integrates closely with the second-level cache.
-This is an optional feature and requires two additional physical cache regions that hold the cached query results and the timestamps when a table was 
-last updated. This is only useful for queries that are run frequently with the same parameters.
- 
-The Second Level Cache
-Hibernate uses first-level cache by default and you have nothing to do to use first-level cache. Let's go straight to the optional second-level cache. 
-The second-level cache is set up in two steps. First, you have to decide which concurrency strategy to use. After that, you configure physical cache 
-attributes and cache expiration using the cache provider.
+2. Second level cache is an optional cache and first-level cache will always be consulted before any attempt is made to locate an object in the second-level 
+cache. The second-level cache can be configured on a per-class and per-collection basis and mainly responsible for caching objects across sessions. 
+
+3. Hibernate uses first-level cache by default and you have nothing to do to use first-level cache. To use 2nd level cache: 
+Include cache provider jar into your project (3rd party cache providers)
+Configure hibernate configuration file
+Update the entity to make it cacheable & provide caching strategy (annotations are hibernate specific). Objects configured to cache goes to 2nd level cache.
+
 Concurrency strategies: A concurrency strategy is a mediator which responsible for storing items of data in the cache and retrieving them from the 
 cache. If you are going to enable a second-level cache, you will have to decide, for each persistent class and collection, which cache concurrency 
 strategy to use.
-· Transactional: Use this strategy for read-mostly data where it is critical to prevent stale data in concurrent transactions, in the rare case of an 
+TRANSACTIONAL: Use this strategy for read-mostly data where it is critical to prevent stale data in concurrent transactions, in the rare case of an 
 update.
-· Read-write: Again use this strategy for read-mostly data where it is critical to prevent stale data in concurrent transactions, in the rare case of 
+READ-WRITE: Again use this strategy for read-mostly data where it is critical to prevent stale data in concurrent transactions, in the rare case of 
 an update.
-· Nonstrict-read-write: This strategy makes no guarantee of consistency between the cache and the database. Use this strategy if data hardly ever 
+NONSTRICT-READ-WRITE: This strategy makes no guarantee of consistency between the cache and the database. Use this strategy if data hardly ever 
 changes and a small likelihood of stale data is not of critical concern.
-· Read-only: A concurrency strategy suitable for data which never changes. Use it for reference data only.
+READ-ONLY: A concurrency strategy suitable for data which never changes. Use it for reference data only.
+
 Cache provider: Your next step is to pick a cache provider. Hibernate forces you to choose a single cache provider for the whole application.
-· EHCache: It can cache in memory or on disk and clustered caching and it supports the optional Hibernate query result cache.
-· OSCache: Supports caching to memory and disk in a single JVM, with a rich set of expiration policies and query cache support.
-· warmCache: A cluster cache based on JGroups. It uses clustered invalidation but doesn't support the Hibernate query cache
-· JBoss Cache: A fully transactional replicated clustered cache also based on the JGroups multicast library. It supports replication or invalidation, 
+- EHCache: It can cache in memory or on disk and clustered caching and it supports the optional Hibernate query result cache.
+- OSCache: Supports caching to memory and disk in a single JVM, with a rich set of expiration policies and query cache support.
+- warmCache: A cluster cache based on JGroups. It uses clustered invalidation but doesn't support the Hibernate query cache
+- JBoss Cache: A fully transactional replicated clustered cache also based on the JGroups multicast library. It supports replication or invalidation, 
 synchronous or asynchronous communication, and optimistic and pessimistic locking. The Hibernate query cache is supported.
 Every cache provider is not compatible with every concurrency strategy. The following compatibility matrix will help you choose an appropriate 
 combination.
 
 EHCACHE.xml
-Now, you need to specify the properties of the cache regions. EHCache has its own configuration file, ehcache.xml, which should be in the CLASSPATH of the application. The various attributes are explained below:
+You need to specify the properties of the cache regions. EHCache has its own configuration file, ehcache.xml, which should be in the CLASSPATH of 
+the application. The various attributes are explained below:
 path:  Sets the path to the directory where cache .data files are created.
 name: Sets the name of the cache. It must be unique.
 maxInMemory: Sets the maximum number of objects that will be created in memory
@@ -51,27 +60,11 @@ timeToIdleSecond: Sets the time to idle for an element before it expires. Is onl
 timeToLiveSeconds: Sets the time to live for an element before it expires. Is only used if the element is not eternal. TTL is now - creation time.
 overflowToDisk: Sets whether elements can overflow to disk when the in-memory cache has reached the maxInMemory limit.
 
-Now we have second-level caching enabled for the Employee class and Hibernate now hits the second-level cache whenever you navigate to a Employee or when you load a Employee by identifier. Emp cache can contain 1000 elements. Elements will always be held in memory.
-You should analyze your all the classes and choose appropriate caching strategy for each of the classes. Sometime, second-level caching may downgrade the performance of the application. So it is recommended to benchmark your application first without enabling caching and later on enable your well suited caching and check the performance. If caching is not improving system performance then there is no point in enabling any type of caching.
-
-Second Level Cache:
-1. In the first level cache or session cache, the objects are cached as long as the session is not closed. If we want the same object again in some other session, we have to load it again in the cache. What if we need some object across multiple session. Second level of cache to the rescue. It provides data:
-· Across sessions in an application
-· Across applications (provided they are all talking to the same data & all are using hibernate)
-· Across clusters (provided they are all talking to the same data & all are using hibernate)
-If any application is not using hibernate, it will not be aware of the cache data and will directly talk to DB and dirtying the data. This will make hibernate cache invalid, as hibernate would not know about this change. But if we are configuring 2nd level cache across applications, hibernate will take care of these issues. 
-2. To use 2nd level cache: 
-Include cache provider jar into your project
-Configure hibernate configuration file
-Update the entity to make it cacheable & provide caching strategy (annotations are hibernate specific). Objects configured to cache goes to 2nd level cache.
-3. Cache Concurrency Strategy:
-READ ONLY
-READ WRITE
-NONSTRICT READ WRITE
-TRANSACTIONAL
-
-NONE
-
+In the demo we have second-level caching enabled for the Employee class and Hibernate now hits the second-level cache whenever you navigate to a Employee or 
+when you load a Employee by identifier. Emp cache can contain 1000 elements. Elements will always be held in memory.
+You should analyze your all the classes and choose appropriate caching strategy for each of the classes. Sometime, second-level caching may downgrade the 
+performance of the application. So it is recommended to benchmark your application first without enabling caching and later on enable your well suited 
+caching and check the performance. If caching is not improving system performance then there is no point in enabling any type of caching.
 
 */
 

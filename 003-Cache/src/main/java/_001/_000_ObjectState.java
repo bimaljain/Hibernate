@@ -1,19 +1,33 @@
-/* 
+/*
+--------------
 Object States:
+--------------
 Create:
 new() creates a object in transient state & remains there until it is handed over to hibernate.
 Session.save() moves the transient object to persistent state.
-Session.close() moves the persistent object to detached state. 
+Session.close() moves the persistent object to detached state.
+
 Read:
 There is no transient state.
 Session.get() gives us a persistent object directly.
-Session.close() moves the persistent object to detached state. 
+Session.close() moves the persistent object to detached state.
+
 Update:
-We can do an update in create flow or in read flow, as long as the object is in presistent state. 
+We can do an update in create flow or in read flow, as long as the object is in presistent state.
+
 Delete:
 Object is in persistent state either by session.save() or session.get().
-
 Session.delete() moves the persitent object to transient state.
+
+DROP TABLE EMP;
+
+CREATE TABLE EMP (
+  ENO INT NOT NULL AUTO_INCREMENT,
+  ENAME VARCHAR(255) ,
+  EADDRESS VARCHAR(100),
+  ESALARY INT,
+  CONSTRAINT ENO_PK PRIMARY KEY (ENO)
+);
 
 */
 
@@ -82,39 +96,25 @@ public class _000_ObjectState {
 		SessionFactory sf = cfg.buildSessionFactory();
 		Session session = sf.openSession();
 		Transaction tx = session.beginTransaction();
+		//transient (new operator)
 		_000Emp emp = new _000Emp("Bimal","Pune",23456);
+		//transient --> persistent
 		session.save(emp);
 		session.get(_000Emp.class, 1);
 		tx.commit();
-		// Moving object from persistent to detached
-		session.close(); 
+		//persistent --> detached
+		session.close();
+		
 		System.out.println();
-		emp.setName("Bimal Jain");
-		// Moving object from detached to persistent
-		System.out.println("Change made while object was detached");
-		session = sf.openSession();
-		tx = session.beginTransaction();    
-		session.update(emp);
-		tx.commit();
-		session.close(); 
-		System.out.println();
-		System.out.println("NO change while object was detached");
-		// Moving object from detached to persistent. 
-		// Still fires update query, as hibernate cannot track the object after the session was closed. So to be safe, hibernate fires an update query.
-		session = sf.openSession();
-		tx = session.beginTransaction();    
-		session.update(emp);
-		tx.commit();
-		session.close(); 
-		System.out.println();
-		emp.setName("Bimal Jain");
-		// Moving object from detached to persistent
-		// More changes made once the object is persisted. But there is only one update query, since hibernate is tracking all the changes in the cache
+		//detached --> persistent
+		//Multiple changes made once the object is attached to a session. But there is only one update query, since hibernate is tracking all the changes in the cache
 		session = sf.openSession();
 		tx = session.beginTransaction();
-		System.out.println("Multiple changes done, but only one update SQL");
 		session.update(emp);
 		emp.setName("Bimal change");
+		session.update(emp);
+		emp.setName("bimlo");
+		session.update(emp);
 		tx.commit();
 		session.close();		
 	}

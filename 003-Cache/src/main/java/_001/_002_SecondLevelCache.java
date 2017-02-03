@@ -1,4 +1,3 @@
-
 package _001;
 
 import java.io.IOException;
@@ -19,8 +18,6 @@ import org.hibernate.cfg.Configuration;
 
 @Entity
 @Table(name="EMP")
-//If we are going to use second-level caching for Employee class, let us add the mapping element required to tell Hibernate to cache Employee 
-//instances using read-write strategy.
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 class _002Emp{
 	
