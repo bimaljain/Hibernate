@@ -55,7 +55,7 @@ import org.hibernate.cfg.Configuration;
 
 @Entity
 @Table(name="EMP")
-public class _001_Emp {
+class _001Emp {
 	
 	@Id
 	@Column(name = "ENO")
@@ -83,9 +83,9 @@ public class _001_Emp {
 	@Column(name="NOTES")
 	String notes;
 	
-	public _001_Emp() {	}
+	public _001Emp() {	}
 
-	public _001_Emp(String name, String address, double salary, Date lastUpdatedTimeStamp, Date dateAdded, String notes) {
+	public _001Emp(String name, String address, double salary, Date lastUpdatedTimeStamp, Date dateAdded, String notes) {
 		super();
 		this.name = name;
 		this.address = address;
@@ -157,22 +157,22 @@ public class _001_Emp {
 				+ ", lastUpdatedTimeStamp=" + lastUpdatedTimeStamp + ", dateAdded=" + dateAdded + ", notes=" + notes
 				+ "]";
 	}
+}
 
+public class _001_CustomColumnMapping{
 	public static void main(String[] args) throws IOException {
-		_003Demo demo = new _003Demo();
+		_001_CustomColumnMapping demo = new _001_CustomColumnMapping();
 		demo.insert();
 		demo.selectAll();
 	}
-}
-
-class _003Demo{
+	
 	public void insert(){
 		Configuration cfg = new Configuration().configure("020_Misc/001.hibernate.cfg.xml");
 		SessionFactory sf = cfg.buildSessionFactory();
 		Session session = sf.openSession();
 		Transaction tx = session.beginTransaction();
 		try {
-			_001_Emp emp = new _001_Emp("Bimal","Pune",23456, new Date(), new Date(), "Hi, I am a java geek");
+			_001Emp emp = new _001Emp("Bimal","Pune",23456, new Date(), new Date(), "Hi, I am a java geek");
 			session.save(emp);
 			tx.commit();
 		} catch (HibernateException e) {
@@ -194,7 +194,7 @@ class _003Demo{
 		Session session = sf.openSession();
 		Transaction tx = session.beginTransaction();
 		try {
-			List<_001_Emp> employees = (List<_001_Emp>)session.createQuery(" FROM _001_Emp").list();
+			List<_001Emp> employees = (List<_001Emp>)session.createQuery(" FROM _001Emp").list();
 			System.out.println(employees);
 		} catch (HibernateException e) {
 			e.printStackTrace();

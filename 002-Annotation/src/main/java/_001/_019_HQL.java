@@ -116,6 +116,81 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
+public class _019_HQL{
+	@SuppressWarnings("unchecked")
+	public static void main(String[] args) throws IOException {
+		Configuration cfg = new Configuration().configure("001/019.hibernate.cfg.xml");
+		SessionFactory sf = cfg.buildSessionFactory();
+		Session session = sf.openSession();
+		Transaction tx = session.beginTransaction();
+		_019Dept dept = new _019Dept("Aladdin Product Group");
+		_019Emp emp1 = new _019Emp(dept, "Bimal","Pune",23456);
+		session.save(dept);
+		session.save(emp1);
+		
+		//FROM
+		Query query = session.createQuery(" from _019Emp");
+		List<_019Emp> employees1 = (List<_019Emp>)query.list();
+		System.out.println(employees1);
+		
+		//SELECT
+		query = session.createQuery("select e.name, e.dept from _019Emp e");
+		List<Object[]> employees2 = query.list();
+		for (Object[] emp : employees2)
+			System.out.println(emp[0] + " " + emp[1]);
+		
+		//WHERE
+		query = session.createQuery(" from _019Emp e where e.name like :pattern");
+		query.setString("pattern", "bimal%");
+		List<_019Emp> employees3 = query.list();
+		System.out.println(employees3);
+		
+		//DELETE
+		int rowDeleted = session.createQuery("delete from _019Emp e where e.name like 'meghna%'").executeUpdate();
+		System.out.println("# of rows deleted" + rowDeleted);
+		
+		//UPDATE
+		query = session.createQuery("update _019Emp e set e.salary = :salary where e.eid = :employee_id");
+		query.setParameter("salary",99999.0);
+		query.setParameter("employee_id",1);
+		int row = query.executeUpdate();
+		System.out.println("Rows affected: " + row);
+
+		//GROUP BY
+		//HQL interprets SELECT e.* as select the member field * of the object R. But * is not a member field of R. To select all the member fields of R use:
+		query = session.createQuery("select e.name, count(*) from _019Emp e group by e.name");
+		List<Object[]> employees4 = query.list();
+		for (Object[] emp : employees4)
+			System.out.println(emp[0] + " " + emp[1]);
+		
+		//ORDER BY
+		query = session.createQuery("select e from _019Emp e order by e.name");
+		List<Object[]> employees5 = query.list();
+		System.out.println(employees5);
+		
+		//AGGREGATE FUNCTIONS
+		//String hql = "SELECT COUNT(*) FROM _019Emp e";
+		//String hql = "SELECT COUNT(DISTINCT e.salary) FROM _019Emp e";
+		//String hql = "SELECT AVG(e.salary) FROM _019Emp e";
+		//String hql = "SELECT SUM(e.salary) FROM _019Empv e";
+		String hql = "SELECT MAX(e.salary) FROM _019Emp e";
+		//String hql = "SELECT MIN(e.salary) FROM _019Emp e";
+		query = session.createQuery(hql);
+		List list = query.list();
+		System.out.println("Output: " + list.get(0));
+
+		//PAGINATION
+		query = session.createQuery("from _019Emp");
+		query.setFirstResult(1);
+		query.setMaxResults(5);
+		List employees6 = query.list();
+		System.out.println(employees6);
+		
+		tx.commit();
+		session.close();
+	}
+}
+
 @Entity
 @Table(name="EMP")
 class _019Emp {
@@ -197,81 +272,5 @@ class _019Dept {
 	
 	public String toString(){
 		return this.did + " " + this.name;
-	}
-}
-
-public class _019_HQL{
-	@SuppressWarnings("unchecked")
-	public static void main(String[] args) throws IOException {
-		Configuration cfg = new Configuration().configure("001/019.hibernate.cfg.xml");
-		SessionFactory sf = cfg.buildSessionFactory();
-		Session session = sf.openSession();
-		Transaction tx = session.beginTransaction();
-		_019Dept dept = new _019Dept("Aladdin Product Group");
-		_019Emp emp1 = new _019Emp(dept, "Bimal","Pune",23456);
-		session.save(dept);
-		session.save(emp1);
-		
-		//FROM
-		Query query = session.createQuery(" FROM _019Emp");
-		List<_019Emp> employees1 = (List<_019Emp>)query.list();
-		System.out.println(employees1);
-		
-		//SELECT
-		query = session.createQuery("SELECT e.name, e.dept FROM _019Emp e");
-		List<Object[]> employees2 = query.list();
-		for (Object[] emp : employees2)
-			System.out.println(emp[0] + " " + emp[1]);
-		
-		//WHERE
-		query = session.createQuery(" FROM _019Emp e WHERE e.name LIKE :pattern");
-		query.setString("pattern", "bimal%");
-		List<_019Emp> employees3 = query.list();
-		System.out.println(employees3);
-		
-		//DELETE
-		int rowDeleted = session.createQuery("DELETE FROM _019Emp e WHERE e.name LIKE 'meghna%'").executeUpdate();
-		System.out.println("# of rows deleted" + rowDeleted);
-		
-		//UPDATE
-		query = session.createQuery("UPDATE _019Emp e set e.salary = :salary WHERE e.eid = :employee_id");
-		query.setParameter("salary",99999.0);
-		query.setParameter("employee_id",1);
-		int row = query.executeUpdate();
-		System.out.println("Rows affected: " + row);
-
-		//GROUP BY
-		//HQL interprets SELECT e.* as select the member field * of the object R. But * is not a member field of R. To select all the member fields of R use:
-		query = session.createQuery("SELECT e.name, count(*) FROM _019Emp e GROUP BY e.name");
-		List<Object[]> employees4 = query.list();
-		for (Object[] emp : employees4)
-			System.out.println(emp[0] + " " + emp[1]);
-		
-		//ORDER BY
-		query = session.createQuery("SELECT e FROM _019Emp e ORDER BY e.name");
-		List<Object[]> employees5 = query.list();
-		System.out.println(employees5);
-		
-		//AGGREGATE FUNCTIONS
-		//String hql = "SELECT COUNT(*) FROM _019Emp e";
-		//String hql = "SELECT COUNT(DISTINCT e.salary) FROM _019Emp e";
-		//String hql = "SELECT AVG(e.salary) FROM _019Emp e";
-		//String hql = "SELECT SUM(e.salary) FROM _019Empv e";
-		String hql = "SELECT MAX(e.salary) FROM _019Emp e";
-		//String hql = "SELECT MIN(e.salary) FROM _019Emp e";
-		query = session.createQuery(hql);
-		List list = query.list();
-		System.out.println("Output: " + list.get(0));
-
-		//PAGINATION
-		query = session.createQuery("FROM _019Emp");
-		query.setFirstResult(1);
-		query.setMaxResults(5);
-		List employees6 = query.list();
-		System.out.println(employees6);
-
-		
-		tx.commit();
-		session.close();
 	}
 }

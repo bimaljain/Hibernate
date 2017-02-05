@@ -10,6 +10,7 @@
 		<property name="hibernate.connection.password">luvondrox</property>
 		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
 		<property name="show_sql">true</property>
-		<mapping class="_020_Misc._001Emp"/>
+		<mapping class="_020_Misc._002Emp"/>
+		<mapping class="_020_Misc._002Dept"/>
 	</session-factory>
 </hibernate-configuration>
