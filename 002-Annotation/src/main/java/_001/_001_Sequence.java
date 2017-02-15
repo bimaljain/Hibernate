@@ -4,7 +4,7 @@ ANNOTATION:
 -----------
 Java Persistence API: JPA is a Standard Specification and Hibernate implements JPA specification. Hibernate also provides it’s own non-standard 
 annotations to work with, but often it’s good practice to follow along with Standards and use standard annotations to make your code portable on other 
-implementations. This example will make use of standard JPA annotations.
+implementations.
 
 @Entity marks this class as Entity Bean. 
 
@@ -23,9 +23,6 @@ assumes that it should access properties on an object directly through fields at
 would enable access to properties through getter and setter methods by default. Hence, all other annotations are also placed on either fields or 
 getter methods, following the selected strategy. 
 
-Each entity bean will have a primary key, which you annotate on the class with the @Id annotation. The primary key can be a single field or a 
-combination of multiple fields depending on your table structure.
-
 -----------------------
 PRIMARY KEY GENERATION:
 -----------------------
@@ -42,11 +39,6 @@ selecthibernate_sequence.nextval from dual
 @GeneratedValue (strategy=GenerationType.TABLE): Hibernate uses a table to get the last primary key used and create the next one.
 @GeneratedValue (strategy=GenerationType.SEQUENCE): Hibernate uses DB managed sequence.
 selectemp_seq.nextval from dual
-
-This exmaple will compare the most common surrogate primary key strategies:
-IDENTITY 		(only available in MySQL, not in oracle)
-SEQUENCE 		(only available in oracle, not in MySQL)
-TABLE SEQUENCE 	(only available in oracle, not in MySQL)
 
 ---------
 SEQUENCE:
@@ -195,6 +187,7 @@ public class _001_Sequence {
 	/*
 	OUTPUT:
 	Hibernate: select emp0_.ENO as ENO1_0_, emp0_.EADDRESS as EADDRESS2_0_, emp0_.ENAME as ENAME3_0_, emp0_.ESALARY as ESALARY4_0_ from EMP emp0_
+	
 	[4 Bimal Pune 23456.0, 5 meghna Pune 98765.0, 7 Bimal Pune 23456.0, 8 meghna Pune 98765.0, 10 Bimal Pune 23456.0, 11 meghna Pune 98765.0, 13 Bimal Pun
 	e 23456.0, 14 meghna Pune 98765.0]
 	 */

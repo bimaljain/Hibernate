@@ -1,7 +1,6 @@
 /* 
-PURPOSE: Hibernate Many-To-One Unidirectional mapping using annotation based configuration.
-In Many-To-One Unidirectional mapping, one table has a foreign key column that references the primary key of associated table.By Unidirectional 
-relationship means only one side navigation is possible (EMP to DEPT in this example).
+In Many-To-One Unidirectional mapping, one table has a foreign key column that references the primary key of associated table.
+By Unidirectional relationship means only one side navigation is possible (EMP to DEPT in this example).
 
 Here we have first created DEPT table followed by EMP table as EMP table contains a foreign key referring to DEPT table.
 drop table DEPT;
@@ -29,11 +28,7 @@ select * from DEPT;
 @ManyToOne indicates that Many EMP can refer to one DEPT. 
 optional=false means this relationship becomes mandatory , no EMP row can be saved without a DEPT reference. 
 @JoinColumn says that there is a column DNO in EMP table which will refer(foreign key) to primary key of the DEPT table. 
-In this example only EMP to DEPT entity navigation is possible. Not vice versa. In practice, however, you are free to use query language to find all the 
-EMP for a given DEPT.
-
 Here we have persisted DEPT class first in order to meet foreign key constraint (not null), then we have persisting EMP.
-
 */
 
 package _001;
@@ -41,6 +36,7 @@ package _001;
 import java.io.IOException;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -68,6 +64,12 @@ class _004Emp {
 	@ManyToOne(optional = false)
     @JoinColumn(name="DNO")
 	_004Dept dept;
+	
+//	If we set cascading on dept property, then we don't have to save dept separately.
+// 	@ManyToOne(optional = false, cascade=CascadeType.ALL)
+//	@JoinColumn(name="DNO")
+//	_004Dept dept;
+
 	
 	@Column(name = "ENAME")
 	String name;
@@ -143,7 +145,7 @@ class _004Dept {
 public class _004_ManyToOne_UniDirectional{
 	
 	public static void main(String[] args) throws IOException {
-		Configuration cfg = new Configuration().configure("004.hibernate.cfg.xml");
+		Configuration cfg = new Configuration().configure("001/004.hibernate.cfg.xml");
 		SessionFactory sf = cfg.buildSessionFactory();
 		_004_ManyToOne_UniDirectional demo = new _004_ManyToOne_UniDirectional();
 		demo.insert(sf);
@@ -156,15 +158,8 @@ public class _004_ManyToOne_UniDirectional{
 		try {
 			_004Dept dept = new _004Dept("Aladdin Product Group");
 			_004Emp emp1 = new _004Emp(dept, "Bimal","Pune",23456);
-			_004Emp emp2 = new _004Emp(dept, "meghna","Pune",98765);
-			session.save(dept);
-			/*If we set cascading on dept property, then we dont have to save dept separately.
-			 	@ManyToOne(optional = false, cascade=CascadeType.ALL)
-			    @JoinColumn(name="DNO")
-				_005_Dept_ManyToOne_UniDirectional dept;
-			 */
+			session.save(dept); // not needed incase you set cascade
 			session.save(emp1);
-			session.save(emp2);
 			tx.commit();
 		} catch (HibernateException e) {
 			tx.rollback();
@@ -176,7 +171,6 @@ public class _004_ManyToOne_UniDirectional{
 	/*
 	OUTPUT:
 	Hibernate: insert into DEPT (DNAME) values (?)
-	Hibernate: insert into EMP (EADDRESS, DNO, ENAME, ESALARY) values (?, ?, ?, ?)
 	Hibernate: insert into EMP (EADDRESS, DNO, ENAME, ESALARY) values (?, ?, ?, ?)
 	 */
 		
@@ -194,16 +188,9 @@ public class _004_ManyToOne_UniDirectional{
 	}
 	/*
 	OUTPUT:
-	Hibernate: select emp_m0_.ENO as ENO1_1_, emp_m0_.EADDRESS as EADDRESS2_1_, emp_m0_.DNO as DNO5_1_, emp_m0_.ENAME as ENAME3_1_, emp_m0_.ESALARY as ESA
-	LARY4_1_ from EMP emp_m0_
-	Hibernate: select dept_0_.DNO as DNO1_0_0_, dept_0_.DNAME as DNAME2_0_0_ from DEPT dept_0_ where dept_0_.DNO=?
-	Hibernate: select dept_0_.DNO as DNO1_0_0_, dept_0_.DNAME as DNAME2_0_0_ from DEPT dept_0_ where dept_0_.DNO=?
-	Hibernate: select dept_0_.DNO as DNO1_0_0_, dept_0_.DNAME as DNAME2_0_0_ from DEPT dept_0_ where dept_0_.DNO=?
-   [1 1 Aladdin Product Group Bimal Pune 23456.0, 
-	2 1 Aladdin Product Group meghna Pune 98765.0, 
-	3 2 Aladdin Product Group Bimal Pune 23456.0, 
-	4 2 Aladdin Product Group meghna Pune 98765.0, 
-	5 3 Aladdin Product Group Bimal Pune 23456.0, 
-	6 3 Aladdin Product Group meghna Pune 98765.0]
+	Hibernate: select emp0_.ENO as ENO1_1_, emp0_.EADDRESS as EADDRESS2_1_, emp0_.DNO as DNO5_1_, emp0_.ENAME as ENAME3_1_, emp0_.ESALARY as ESALARY4_1_ from EMP emp0_
+	Hibernate: select dept0_.DNO as DNO1_0_0_, dept0_.DNAME as DNAME2_0_0_ from DEPT dept0_ where dept0_.DNO=?
+	
+	[1 1 Aladdin Product Group Bimal Pune 23456.0]
 	 */
 }

@@ -2,8 +2,6 @@
 ---------
 IDENTITY:
 --------- 
-Use MySQL DB. 
-The IDENTITY type is supported by MySQL but not by ORACLE. 
 GenerationType.IDENTITY will use AUTO_INCREMENT
 
 drop table EMP;

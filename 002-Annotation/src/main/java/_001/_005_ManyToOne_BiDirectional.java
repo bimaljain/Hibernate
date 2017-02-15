@@ -1,15 +1,13 @@
 /* 
-PURPOSE: Hibernate Many-To-One Bidirectional mapping using annotation based configuration.
+In Bidirectional relationship, both side navigation is possible.
+In hibernate, for bidirectional relationships, we have a concept of ownership, means who is the owner of this relationship. Put simply, who is responsible 
+for updating the column in DB on which this relationship depends on.
 
-Schema layout for Many-To-One Bidirectional mapping is exactly same as Many-To-One Unidirectional Mapping. One table has a foreign key column that 
-references the primary key of associated table. In Bidirectional relationship, both side navigation is possible.
+mappedBy attribute are always put(annotated) on the inverse side of relation ship and specifies with it’s attribute value, the owner of the relationship.
 
 @OneToMany on list property here denotes that one DEPT can have multiple EMP. With EMP property defined in DEPT class, we can now navigate from DEPT to 
-EMP. mappedBy says that it’s the inverse side of relationship.Also note the cascade attribute, which means the dependent object(EMP) will be 
-persisted/updated/deleted automatically on subsequent persist/update/delete on DEPT object. No need to perform operation separately on EMP.
-
-You can see that we have updated both the EMP and DEPT object with there associations but we have only saved DEPT explicitly. Since we have cascade 
-attribute set to all on EMP list of DEPT, all child objects(EMP) will be saved on persisting parent object(DEPT).
+EMP. mappedBy says that it’s the inverse side of relationship. Also note the cascade attribute, which means the child object(EMP) will be 
+persisted/updated/deleted automatically on subsequent persist/update/delete of DEPT object (parent). No need to perform operation separately on EMP.
 */
 
 package _001;

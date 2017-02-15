@@ -2,8 +2,6 @@
 ---------------
 TABLE SEQUENCE:
 ---------------
-Use Oracle DB
-
 drop table EMP;
 drop table GENERATOR_TABLE;
 
@@ -14,6 +12,11 @@ CREATE TABLE EMP (
   ESALARY INT,
   CONSTRAINT ENO_PK PRIMARY KEY (ENO)
 );
+
+CREATE TABLE GENERATOR_TABLE (
+TABLE_NAME VARCHAR(255) not null, 
+NEXT_KEY INT, 
+CONSTRAINT GT_PK PRIMARY KEY(TABLE_NAME));
 
 select * from EMP;
 select * from GENERATOR_TABLE;
@@ -45,15 +48,13 @@ class _002Emp{
 	
 	@Id
 	@Column(name = "ENO")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="EMPLOYEE_TABLE_SEQUENCE")
-	@TableGenerator(
-		    name="EMPLOYEE_TABLE_SEQUENCE", //generator name
-		    table="GENERATOR_TABLE",		//table name which stores the sequence
-		    pkColumnName = "key", 			//stores the table name for which next sequence is saved
-		    valueColumnName = "next",		//stores the next sequence
-		    pkColumnValue="EMP",
-		    allocationSize=1
-		)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator="EMPLOYEE_TABLE_SEQUENCE")
+	@TableGenerator(name="EMPLOYEE_TABLE_SEQUENCE", //generator name
+				    table="GENERATOR_TABLE",		//table name which stores the sequence
+				    pkColumnName = "TABLE_NAME", 	//stores the table name for which next sequence is saved
+				    valueColumnName = "NEXT_KEY",	//stores the next sequence
+				    pkColumnValue="EMP",
+				    allocationSize=1)
 	int eid;
 	
 	@Column(name = "ENAME")
@@ -104,9 +105,7 @@ public class _002_TableSequence {
 		Transaction tx = session.beginTransaction();
 		try {
 			_002Emp emp1 = new _002Emp("Bimal","Pune",23456);
-			_002Emp emp2 = new _002Emp("meghna","Pune",98765);
 			session.save(emp1);
-			session.save(emp2);
 			tx.commit();
 		} catch (HibernateException e) {
 			tx.rollback();
@@ -117,9 +116,14 @@ public class _002_TableSequence {
 	}
 	/*
 	OUTPUT:
-	Hibernate: select tbl.next from GENERATOR_TABLE tbl where tbl.key=? for update
-	Hibernate: update GENERATOR_TABLE set next=?  where next=? and key=?
+	Hibernate: select tbl.NEXT_KEY from GENERATOR_TABLE tbl where tbl.TABLE_NAME=? for update
+	Hibernate: insert into GENERATOR_TABLE (TABLE_NAME, NEXT_KEY)  values (?,?)
+	Hibernate: update GENERATOR_TABLE set NEXT_KEY=?  where NEXT_KEY=? and TABLE_NAME=?
 	Hibernate: insert into EMP (EADDRESS, ENAME, ESALARY, ENO) values (?, ?, ?, ?)
+	
+	2nd Run:
+	Hibernate: select tbl.NEXT_KEY from GENERATOR_TABLE tbl where tbl.TABLE_NAME=? for update
+	Hibernate: update GENERATOR_TABLE set NEXT_KEY=?  where NEXT_KEY=? and TABLE_NAME=?
 	Hibernate: insert into EMP (EADDRESS, ENAME, ESALARY, ENO) values (?, ?, ?, ?)
 	 */
 		
@@ -138,10 +142,8 @@ public class _002_TableSequence {
 	}
 	/*
 	OUTPUT:
-	Hibernate: select emp_t0_.ENO as ENO1_0_, emp_t0_.EADDRESS as EADDRESS2_0_, emp_t0_.ENAME as ENAME3_0_, emp_t0_.ESALARY as ESALARY4_0_ from EMP emp_t0
-	_
-	[4 Bimal Pune 23456.0, 5 meghna Pune 98765.0, 7 Bimal Pune 23456.0, 8 meghna Pune 98765.0, 10 Bimal Pune 23456.0, 11 meghna Pune 98765.0, 13 Bimal Pun
-	e 23456.0, 14 meghna Pune 98765.0, 16 Bimal Pune 23456.0, 17 meghna Pune 98765.0, 19 Bimal Pune 23456.0, 20 meghna Pune 98765.0, 21 Bimal Pune 23456.0
-	, 22 meghna Pune 98765.0, 23 Bimal Pune 23456.0, 24 meghna Pune 98765.0, 25 Bimal Pune 23456.0, 26 meghna Pune 98765.0]
+	Hibernate: select emp0_.ENO as ENO1_0_, emp0_.EADDRESS as EADDRESS2_0_, emp0_.ENAME as ENAME3_0_, emp0_.ESALARY as ESALARY4_0_ from EMP emp0_
+	
+	[1 Bimal Pune 23456.0]
 	 */
 }
