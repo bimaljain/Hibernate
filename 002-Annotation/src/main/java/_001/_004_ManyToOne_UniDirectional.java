@@ -1,16 +1,23 @@
 /* 
-In Many-To-One Unidirectional mapping, one table has a foreign key column that references the primary key of associated table.
-By Unidirectional relationship means only one side navigation is possible (EMP to DEPT in this example).
+1. In Many-To-One Unidirectional mapping, one table has a foreign key column that references the primary key of associated table.
+2. By Unidirectional relationship means only one side navigation is possible (EMP to DEPT in this example).
+3. @ManyToOne indicates that many EMP can refer to one DEPT. 
+4. optional=false means this relationship becomes mandatory, no EMP row can be saved without a DEPT reference. 
+5. @JoinColumn says that there is a column DNO in EMP table which will refer(foreign key) to primary key of the DEPT table. 
+6. Here we have persisted DEPT class first in order to meet foreign key constraint (not null), then we have persisted EMP. Instead you can use cascade attribute.
 
+-----------
+DB DETAILS:
+-----------
 Here we have first created DEPT table followed by EMP table as EMP table contains a foreign key referring to DEPT table.
-drop table DEPT;
 drop table EMP;
+drop table DEPT;
 
 CREATE TABLE DEPT (
   DNO INT NOT NULL AUTO_INCREMENT,
   DNAME VARCHAR(255) NOT NULL,
   PRIMARY KEY (DNO)
-  )
+  );
 
 CREATE TABLE EMP (
   ENO INT NOT NULL AUTO_INCREMENT,
@@ -20,15 +27,10 @@ CREATE TABLE EMP (
   ESALARY INT,
   PRIMARY KEY (ENO),
   CONSTRAINT EMP_DEPT FOREIGN KEY (DNO) REFERENCES DEPT (DNO) ON UPDATE CASCADE ON DELETE CASCADE
-)
+);
 
 select * from EMP;
 select * from DEPT;
-
-@ManyToOne indicates that Many EMP can refer to one DEPT. 
-optional=false means this relationship becomes mandatory , no EMP row can be saved without a DEPT reference. 
-@JoinColumn says that there is a column DNO in EMP table which will refer(foreign key) to primary key of the DEPT table. 
-Here we have persisted DEPT class first in order to meet foreign key constraint (not null), then we have persisting EMP.
 */
 
 package _001;
@@ -36,7 +38,6 @@ package _001;
 import java.io.IOException;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

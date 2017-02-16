@@ -1,36 +1,9 @@
-/*
-PURPOSE: One-To-One BiDirectional
-
-DROP TABLE STUDENT;
-DROP TABLE ADDRESS;
-
-create table ADDRESS (
-   ADDRESS_ID INT NOT NULL AUTO_INCREMENT,
-   street VARCHAR(30),
-   city  VARCHAR(30),
-   country  VARCHAR(30),
-   PRIMARY KEY (ADDRESS_ID)
-);
-
-create table STUDENT (
-   STUDENT_ID INT NOT NULL AUTO_INCREMENT,
-   first_name VARCHAR(30) NOT NULL,
-   last_name  VARCHAR(30) NOT NULL,
-   STUDENT_ADDRESS_ID INT NOT NULL,
-   PRIMARY KEY (student_id),
-   CONSTRAINT address_student FOREIGN KEY (STUDENT_ADDRESS_ID) REFERENCES ADDRESS (ADDRESS_ID)
-);
-
-select * from STUDENT;
-select * from ADDRESS;
-
- */
-
 package _001;
 
 import java.io.IOException;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -61,7 +34,7 @@ class _011Student {
     @Column(name = "LAST_NAME")
     private String lastName;
  
-    @OneToOne
+    @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="STUDENT_ADDRESS_ID")
     private _011Address address;
  
@@ -105,13 +78,16 @@ class _011Student {
 	public void setAddress(_011Address address) {
 		this.address = address;
 	}
- 
-    @Override
-    public String toString() {
-        return "Student [id=" + id + ", firstName=" + firstName + ", lastName="
-                + lastName + "]";
-    }
 
+	@Override
+	public String toString() {
+		return "_011Student [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + "]";
+	}
+
+//	@Override
+//	public String toString() {
+//		return "_011Student [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", address=" + address + "]";
+//	}	
 }
 
 @Entity
@@ -183,13 +159,16 @@ class _011Address {
     public void setCountry(String country) {
         this.country = country;
     }
+
+	@Override
+	public String toString() {
+		return "_011Address [id=" + id + ", street=" + street + ", city=" + city + ", country=" + country + ", student=" + student + "]";
+	}
  
-    @Override
-    public String toString() {
-        return "Address [id=" + id + ", street=" + street + ", city=" + city
-                + ", country=" + country + "]";
-    }
-     
+//    @Override
+//    public String toString() {
+//        return "Address [id=" + id + ", street=" + street + ", city=" + city + ", country=" + country + "]";
+//    }     
 }
 
 class _011_OneToOne_BiDirectional{    
@@ -198,7 +177,7 @@ class _011_OneToOne_BiDirectional{
 		SessionFactory sf = cfg.buildSessionFactory();
     	_011_OneToOne_BiDirectional demo = new _011_OneToOne_BiDirectional();
 		demo.insert(sf);
-		demo.select(sf);
+//		demo.select(sf);
 		demo.inverseSelect(sf);
 	}
     
@@ -208,9 +187,6 @@ class _011_OneToOne_BiDirectional{
 		try {
 			_011Student student = new _011Student("bimal","jain");
 			_011Address address = new _011Address("Fremont Blvd","Fremont","USA");
-			//Here we have persisted Address class first in order to meet foreign key constraint(not null), then we have set student’s address property 
-			//followed by persisting student.
-			session.save(address);
 			student.setAddress(address);
 	        session.save(student);       
 	        tx.commit();
@@ -233,9 +209,7 @@ class _011_OneToOne_BiDirectional{
 		Transaction tx = session.beginTransaction();
 		try {
 			List<_011Student> students = (List<_011Student>)session.createQuery(" FROM _001._011Student").list();
-			for(_011Student student : students){
-				System.out.println(student.getFirstName() + " " + student.getAddress().toString());
-			}
+			System.out.println(students);
 		} catch (HibernateException e) {
 			e.printStackTrace();
 		}finally{
@@ -244,15 +218,17 @@ class _011_OneToOne_BiDirectional{
 	}
 	/*
 	OUTPUT:
-	Hibernate: select stude0_.STUDENT_ID as STUDENT_1_1_, stude0_.STUDENT_ADDRESS_ID as STUDENT_4_1_, stude0_.FIRST_NAME as FIRST_NA2_1_, stude0_.LAST_NAM
-	E as LAST_NAM3_1_ from STUDENT stude0_
-	Hibernate: select addre0_.ADDRESS_ID as ADDRESS_1_0_0_, addre0_.CITY as CITY2_0_0_, addre0_.COUNTRY as COUNTRY3_0_0_, addre0_.STREET as STREET4_0_0_, 
-	stude1_.STUDENT_ID as STUDENT_1_1_1_, stude1_.STUDENT_ADDRESS_ID as STUDENT_4_1_1_, stude1_.FIRST_NAME as FIRST_NA2_1_1_, stude1_.LAST_NAME as LAST_NA
-	M3_1_1_ from ADDRESS addre0_ left outer join STUDENT stude1_ on addre0_.ADDRESS_ID=stude1_.STUDENT_ADDRESS_ID where addre0_.ADDRESS_ID=?
-	Hibernate: select stude0_.STUDENT_ID as STUDENT_1_1_1_, stude0_.STUDENT_ADDRESS_ID as STUDENT_4_1_1_, stude0_.FIRST_NAME as FIRST_NA2_1_1_, stude0_.LA
-	ST_NAME as LAST_NAM3_1_1_, addre1_.ADDRESS_ID as ADDRESS_1_0_0_, addre1_.CITY as CITY2_0_0_, addre1_.COUNTRY as COUNTRY3_0_0_, addre1_.STREET as STREE
-	T4_0_0_ from STUDENT stude0_ left outer join ADDRESS addre1_ on stude0_.STUDENT_ADDRESS_ID=addre1_.ADDRESS_ID where stude0_.STUDENT_ADDRESS_ID=?
-	bimal Address [id=1, street=Fremont Blvd, city=Fremont, country=USA]
+	Hibernate: select studen0_.STUDENT_ID as STUDENT_1_1_, studen0_.STUDENT_ADDRESS_ID as STUDENT_4_1_, studen0_.FIRST_NAME as FIRST_NA2_1_, studen0_.LAST
+	_NAME as LAST_NAM3_1_ from STUDENT studen0_
+	Hibernate: select addres0_.ADDRESS_ID as ADDRESS_1_0_0_, addres0_.CITY as CITY2_0_0_, addres0_.COUNTRY as COUNTRY3_0_0_, addres0_.STREET as STREET4_0_
+	0_, studen1_.STUDENT_ID as STUDENT_1_1_1_, studen1_.STUDENT_ADDRESS_ID as STUDENT_4_1_1_, studen1_.FIRST_NAME as FIRST_NA2_1_1_, studen1_.LAST_NAME as
+	 LAST_NAM3_1_1_ from ADDRESS addres0_ left outer join STUDENT studen1_ on addres0_.ADDRESS_ID=studen1_.STUDENT_ADDRESS_ID where addres0_.ADDRESS_ID=?
+	Hibernate: select studen0_.STUDENT_ID as STUDENT_1_1_1_, studen0_.STUDENT_ADDRESS_ID as STUDENT_4_1_1_, studen0_.FIRST_NAME as FIRST_NA2_1_1_, studen0
+	_.LAST_NAME as LAST_NAM3_1_1_, addres1_.ADDRESS_ID as ADDRESS_1_0_0_, addres1_.CITY as CITY2_0_0_, addres1_.COUNTRY as COUNTRY3_0_0_, addres1_.STREET 
+	as STREET4_0_0_ from STUDENT studen0_ left outer join ADDRESS addres1_ on studen0_.STUDENT_ADDRESS_ID=addres1_.ADDRESS_ID where studen0_.STUDENT_ADDRE
+	SS_ID=?
+	
+	[_011Student [id=1, firstName=bimal, lastName=jain, address=Address [id=1, street=Fremont Blvd, city=Fremont, country=USA]]]
 	 */
 	
 	@SuppressWarnings("unchecked")
@@ -261,9 +237,7 @@ class _011_OneToOne_BiDirectional{
 		Transaction tx = session.beginTransaction();
 		try {
 			List<_011Address> addresses = (List<_011Address>)session.createQuery(" FROM _001._011Address").list();
-			for(_011Address address : addresses){
-				System.out.println(address.getStudent().getFirstName() + " " + address.toString());
-			}
+			System.out.println(addresses);
 		} catch (HibernateException e) {
 			e.printStackTrace();
 		}finally{
@@ -272,12 +246,14 @@ class _011_OneToOne_BiDirectional{
 	}
 	/*
 	OUTPUT:
-	Hibernate: select addre0_.ADDRESS_ID as ADDRESS_1_0_, addre0_.CITY as CITY2_0_, addre0_.COUNTRY as COUNTRY3_0_, addre0_.STREET as STREET4_0_ from ADDR
-	ESS addre0_
-	Hibernate: select stude0_.STUDENT_ID as STUDENT_1_1_1_, stude0_.STUDENT_ADDRESS_ID as STUDENT_4_1_1_, stude0_.FIRST_NAME as FIRST_NA2_1_1_, stude0_.LA
-	ST_NAME as LAST_NAM3_1_1_, addre1_.ADDRESS_ID as ADDRESS_1_0_0_, addre1_.CITY as CITY2_0_0_, addre1_.COUNTRY as COUNTRY3_0_0_, addre1_.STREET as STREE
-	T4_0_0_ from STUDENT stude0_ left outer join ADDRESS addre1_ on stude0_.STUDENT_ADDRESS_ID=addre1_.ADDRESS_ID where stude0_.STUDENT_ADDRESS_ID=?
-	bimal Address [id=1, street=Fremont Blvd, city=Fremont, country=USA]
+	Hibernate: select addres0_.ADDRESS_ID as ADDRESS_1_0_, addres0_.CITY as CITY2_0_, addres0_.COUNTRY as COUNTRY3_0_, addres0_.STREET as STREET4_0_ from 
+	ADDRESS addres0_
+	Hibernate: select studen0_.STUDENT_ID as STUDENT_1_1_1_, studen0_.STUDENT_ADDRESS_ID as STUDENT_4_1_1_, studen0_.FIRST_NAME as FIRST_NA2_1_1_, studen0
+	_.LAST_NAME as LAST_NAM3_1_1_, addres1_.ADDRESS_ID as ADDRESS_1_0_0_, addres1_.CITY as CITY2_0_0_, addres1_.COUNTRY as COUNTRY3_0_0_, addres1_.STREET 
+	as STREET4_0_0_ from STUDENT studen0_ left outer join ADDRESS addres1_ on studen0_.STUDENT_ADDRESS_ID=addres1_.ADDRESS_ID where studen0_.STUDENT_ADDRE
+	SS_ID=?
+	
+	[_011Address [id=1, street=Fremont Blvd, city=Fremont, country=USA, student=_011Student [id=1, firstName=bimal, lastName=jain]]]
 	 */
 	
 }

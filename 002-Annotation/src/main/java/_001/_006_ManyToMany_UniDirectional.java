@@ -1,19 +1,16 @@
 /*
-PURPOSE: Hibernate Many-To-Many Unidirectional mapping using annotation based configuration.
+1. In Many-To-Many association, an extra table is used (known as Joined table) whose primary key is the combination of primary key of both the associated 
+tables. In other words there is a foreign key association between the joined table and the associated tables.
 
-In Many-To-Many association, an extra table is used (known as Joined table) whose primary key is the combination of primary key of both the associated 
-tables.In other words there is a foreign key association between the joined table and the associated tables.
+2. @JoinTable indicates that there is a link table which joins two tables via containing there keys. This annotation is mainly used on the owning side of 
+the relationship. joinColumns refers to the column name of owning side(STUDENT_ID of STUDENT), and inverseJoinColumns refers to the column of inverse side 
+of relationship(SUBJECT_ID of SUBJECT). Primary key of this joined table is combination of STUDENT_ID & SUBJECT_ID.
 
-@ManyToMany indicates that there is a Many-to-Many relationship between Student and subject. A Student can enroll for multiple subjects, and a subject can 
-have multiple students enrolled.Notice cascade = CascadeType.ALL, with cascading while persisting (update/delete) Student tuples, subjects tuples will 
-also be persisted (updated/deleted).
+3. In case of *Many* association, always override hashcode and equals method which are looked by hibernate when holding entities into collections.
 
-@JoinTable indicates that there is a link table which joins two tables via containing there keys.This annotation is mainly used on the owning side of the 
-relationship.joinColumns refers to the column name of owning side(STUDENT_ID of STUDENT), and inverseJoinColumns refers to the column of inverse side of 
-relationship(SUBJECT_ID of SUBJECT).Primary key of this joined table is combination of STUDENT_ID & SUBJECT_ID.
-
-In case of *Many* association, always override hashcode and equals method which are looked by hibernate when holding entities into collections.
-
+-----------
+DB DETAILS:
+-----------
 DROP TABLE STUDENT_SUBJECT;
 DROP TABLE STUDENT;
 DROP TABLE SUBJECT;
@@ -148,12 +145,11 @@ class _006Student {
             return false;
         return true;
     }
- 
-    @Override
-    public String toString() {
-        return "Student [id=" + id + ", firstName=" + firstName + ", lastName="
-                + lastName + "]";
-    }
+
+	@Override
+	public String toString() {
+		return "_006Student [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", subjects=" + subjects + "]";
+	}
 }
 
 @Entity
@@ -255,6 +251,7 @@ public class _006_ManyToMany_UniDirectional {
 	        student2.getSubjects().add(subject1);
 	        student2.getSubjects().add(subject2);
 	        
+	        // no need to save subjects separately
 	        session.save(student1);
 	        session.save(student2);
 			tx.commit();
@@ -285,9 +282,7 @@ public class _006_ManyToMany_UniDirectional {
 		Transaction tx = session.beginTransaction();
 		try {
 			List<_006Student> students = (List<_006Student>)session.createQuery(" FROM _001._006Student").list();
-			for(_006Student student : students){
-				System.out.println(student.getFirstName() + " " + student.getSubjects().toString());
-			}
+			System.out.println(students);
 		} catch (HibernateException e) {
 			e.printStackTrace();
 		}finally{
@@ -296,15 +291,15 @@ public class _006_ManyToMany_UniDirectional {
 	}
 	/*
 	OUTPUT:
-	Hibernate: select stude0_.STUDENT_ID as STUDENT_1_0_, stude0_.FIRST_NAME as FIRST_NA2_0_, stude0_.LAST_NAME as LAST_NAM3_0_ from STUDENT stude0_
-	Hibernate: select subjects0_.STUDENT_ID as STUDENT_1_1_0_, subjects0_.SUBJECT_ID as SUBJECT_2_1_0_, subje1_.SUBJECT_ID as SUBJECT_1_2_1_, subje1_.SUBJ
-	ECT_NAME as SUBJECT_2_2_1_ from STUDENT_SUBJECT subjects0_ inner join SUBJECT subje1_ on subjects0_.SUBJECT_ID=subje1_.SUBJECT_ID where subjects0_.STU
-	DENT_ID=?
-	Sam [Subject [id=1, name=Economics], Subject [id=2, name=Politics], Subject [id=3, name=Foreign Affairs]]
+	Hibernate: select studen0_.STUDENT_ID as STUDENT_1_0_, studen0_.FIRST_NAME as FIRST_NA2_0_, studen0_.LAST_NAME as LAST_NAM3_0_ from STUDENT studen0_
+	Hibernate: select subjects0_.STUDENT_ID as STUDENT_1_1_0_, subjects0_.SUBJECT_ID as SUBJECT_2_1_0_, subjec1_.SUBJECT_ID as SUBJECT_1_2_1_, subjec1_.SU
+	BJECT_NAME as SUBJECT_2_2_1_ from STUDENT_SUBJECT subjects0_ inner join SUBJECT subjec1_ on subjects0_.SUBJECT_ID=subjec1_.SUBJECT_ID where subjects0_
+	.STUDENT_ID=?
+	Hibernate: select subjects0_.STUDENT_ID as STUDENT_1_1_0_, subjects0_.SUBJECT_ID as SUBJECT_2_1_0_, subjec1_.SUBJECT_ID as SUBJECT_1_2_1_, subjec1_.SU
+	BJECT_NAME as SUBJECT_2_2_1_ from STUDENT_SUBJECT subjects0_ inner join SUBJECT subjec1_ on subjects0_.SUBJECT_ID=subjec1_.SUBJECT_ID where subjects0_
+	.STUDENT_ID=?
 	
-	Hibernate: select subjects0_.STUDENT_ID as STUDENT_1_1_0_, subjects0_.SUBJECT_ID as SUBJECT_2_1_0_, subje1_.SUBJECT_ID as SUBJECT_1_2_1_, subje1_.SUBJ
-	ECT_NAME as SUBJECT_2_2_1_ from STUDENT_SUBJECT subjects0_ inner join SUBJECT subje1_ on subjects0_.SUBJECT_ID=subje1_.SUBJECT_ID where subjects0_.STU
-	DENT_ID=?
-	Joshua [Subject [id=1, name=Economics], Subject [id=2, name=Politics]]
+	[_006Student [id=1, firstName=Sam, lastName=Disilva, subjects=[Subject [id=1, name=Economics], Subject [id=2, name=Politics], Subject [id=3, name=Foreign Affairs]]], 
+	_006Student [id=2, firstName=Joshua, lastName=Brill, subjects=[Subject [id=1, name=Economics], Subject [id=2, name=Politics]]]]
 	 */
 }

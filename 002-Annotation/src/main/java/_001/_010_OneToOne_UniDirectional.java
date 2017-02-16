@@ -1,15 +1,9 @@
 /*
 PURPOSE: Hibernate One-To-One Unidirectional Foreign Key association mapping using annotation based configuration.
+Here one table has a foreign key column that references the primary key of associated table.
 
-In One-To-One Unidirectional with Foreign Key association mapping, one table has a foreign key column that references the primary key of associated table.
-By Unidirectional relationship means only one side navigation is possible (STUDENT to ADDRESS in this example).
-
-Difference between Student class define here and in the previous tutorial(shared primary key) is that we have replaced @PrimaryKeyJoinColumn with 
-@joinColumn which maps on a seperate column in database but will still point to primary key of address table, thanks to the foreign key constrained we 
-have declared during table creation time. Address class is completly independent of Student table.
-
-DROP TABLE STUDENT;
 DROP TABLE ADDRESS;
+DROP TABLE STUDENT;
 
 create table ADDRESS (
    ADDRESS_ID INT NOT NULL AUTO_INCREMENT,
@@ -30,7 +24,6 @@ create table STUDENT (
 
 select * from STUDENT;
 select * from ADDRESS;
-
  */
 
 package _001;
@@ -38,6 +31,7 @@ package _001;
 import java.io.IOException;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -68,7 +62,7 @@ class _010Student {
     @Column(name = "LAST_NAME")
     private String lastName;
  
-    @OneToOne
+    @OneToOne(cascade=CascadeType.ALL)
     @JoinColumn(name="STUDENT_ADDRESS_ID")
     private _010Address address;
  
@@ -112,13 +106,11 @@ class _010Student {
 	public void setAddress(_010Address address) {
 		this.address = address;
 	}
- 
-    @Override
-    public String toString() {
-        return "Student [id=" + id + ", firstName=" + firstName + ", lastName="
-                + lastName + "]";
-    }
 
+	@Override
+	public String toString() {
+		return "_010Student [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", address=" + address + "]";
+	}
 }
 
 @Entity
@@ -183,8 +175,7 @@ class _010Address {
  
     @Override
     public String toString() {
-        return "Address [id=" + id + ", street=" + street + ", city=" + city
-                + ", country=" + country + "]";
+        return "Address [id=" + id + ", street=" + street + ", city=" + city + ", country=" + country + "]";
     }
      
 }
@@ -204,9 +195,7 @@ class _010_OneToOne_UniDirectional{
 		try {
 			_010Student student = new _010Student("bimal","jain");
 			_010Address address = new _010Address("Fremont Blvd","Fremont","USA");
-			//Here we have persisted Address class first in order to meet foreign key constraint(not null), then we have set student’s address property 
-			//followed by persisting student.
-			session.save(address);
+//			session.save(address); //without cascade
 			student.setAddress(address);
 	        session.save(student);       
 	        tx.commit();
@@ -229,9 +218,7 @@ class _010_OneToOne_UniDirectional{
 		Transaction tx = session.beginTransaction();
 		try {
 			List<_010Student> students = (List<_010Student>)session.createQuery(" FROM _001._010Student").list();
-			for(_010Student student : students){
-				System.out.println(student.getFirstName() + " " + student.getAddress().toString());
-			}
+			System.out.println(students);
 		} catch (HibernateException e) {
 			e.printStackTrace();
 		}finally{
@@ -240,10 +227,11 @@ class _010_OneToOne_UniDirectional{
 	}
 	/*
 	OUTPUT:
-	Hibernate: select stude0_.STUDENT_ID as STUDENT_1_1_, stude0_.STUDENT_ADDRESS_ID as STUDENT_4_1_, stude0_.FIRST_NAME as FIRST_NA2_1_, stude0_.LAST_NAM
-	E as LAST_NAM3_1_ from STUDENT stude0_
-	Hibernate: select addre0_.ADDRESS_ID as ADDRESS_1_0_0_, addre0_.CITY as CITY2_0_0_, addre0_.COUNTRY as COUNTRY3_0_0_, addre0_.STREET as STREET4_0_0_ f
-	rom ADDRESS addre0_ where addre0_.ADDRESS_ID=?
-	bimal Address [id=2, street=Fremont Blvd, city=Fremont, country=USA]
+	Hibernate: select studen0_.STUDENT_ID as STUDENT_1_1_, studen0_.STUDENT_ADDRESS_ID as STUDENT_4_1_, studen0_.FIRST_NAME as FIRST_NA2_1_, studen0_.LAST
+	_NAME as LAST_NAM3_1_ from STUDENT studen0_
+	Hibernate: select addres0_.ADDRESS_ID as ADDRESS_1_0_0_, addres0_.CITY as CITY2_0_0_, addres0_.COUNTRY as COUNTRY3_0_0_, addres0_.STREET as STREET4_0_
+	0_ from ADDRESS addres0_ where addres0_.ADDRESS_ID=?
+	
+	[_010Student [id=1, firstName=bimal, lastName=jain, address=Address [id=1, street=Fremont Blvd, city=Fremont, country=USA]]]
 	 */
 }

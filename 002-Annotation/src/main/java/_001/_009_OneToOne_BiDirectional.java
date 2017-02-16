@@ -1,56 +1,5 @@
 /*
-PURPOSE: Hibernate One-To-One Bidirectional Shared primary key mapping using annotation based configuration.
-
-In One-To-One Bidirectional Shared primary key mapping, two tables share the same primary key.
-The Bidirectional relationship means navigation is possible in both direction.
-
-Note that now we have a student property in Address class and address property in Student class, which means we can now navigate in either direction.In 
-hibernate, for bidirectional relationships like this, we have a concept of ownership, means who is the owner of this relationship.Put simply, who is 
-responsible for updating the column in DB on which this relationship depends on. In our case it’s the student_id of Student table which is driving the 
-complete relationship truck. So we should tell hibernate that it’s the Student class which will manage the relationship.
-
-To do that, we can use mappedBy attribute. mappedBy attribute are always put(annotated) on the inverse side of relation ship and specifies with it’s 
-attribute value, the owner of the relationship.
-
-	@OneToOne(mappedBy="student", cascade = CascadeType.ALL)
-	private Address address;
-With this declaration, we ask hibernate to go and find the student property of Address class to know how to manage the relationship/perform some 
-operation. Now in Address class , we have following declaration
-
-	@OneToOne
-	@PrimaryKeyJoinColumn
-	private Student student;
-Which simply says that both the Address table and Student table share the same primary key.
-
-But how would you make sure to that Address class use the same id value as used by Student? You have to make sure in your code that you set the id of 
-Address with the id of saved Student before you save address(as we did in one-to-one unidirectional tutorial).If you don’t want to do that, another option 
-is to use hibernate specific annotation @GenericGenerator (that’s what we are doing now in Address class). In Address class, @GenericGenerator ensures 
-that id value of Address property value will be taken from the id of Student table.
-
-Look at how we have set address property of student and student property of address.Then we have called save only on student, thanks to Cascade attribute 
-on address property of Student class, address will be saved automatically.
-
-DROP TABLE ADDRESS;
-DROP TABLE STUDENT;
-
-create table STUDENT (
-   student_id INT NOT NULL AUTO_INCREMENT,
-   first_name VARCHAR(30) NOT NULL,
-   last_name  VARCHAR(30) NOT NULL,
-   PRIMARY KEY (student_id)
-);
-
-create table ADDRESS (
-   ADDRESS_ID INT NOT NULL,
-   street VARCHAR(30),
-   city  VARCHAR(30),
-   country  VARCHAR(30),
-   PRIMARY KEY (ADDRESS_ID),
-   CONSTRAINT student_address FOREIGN KEY (ADDRESS_ID) REFERENCES STUDENT (student_id) ON UPDATE CASCADE ON DELETE CASCADE
-)
-select * from STUDENT;
-select * from ADDRESS;
-
+PURPOSE: Hibernate One-To-One Bidirectional Shared primary key mapping.
  */
 
 package _001;
@@ -91,12 +40,9 @@ class _009Student {
     @Column(name = "LAST_NAME")
     private String lastName;
  
-    @OneToOne(mappedBy="student", cascade = CascadeType.ALL)
-    private _009Address address; 
-//	  Alternatively:
-//    @OneToOne(cascade = CascadeType.ALL)
-//    @PrimaryKeyJoinColumn
-//    private _017_Address_OneToOne_BiDirectional address;
+    @OneToOne(cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private _009Address address;
     
     public _009Student() {
     }
@@ -137,12 +83,17 @@ class _009Student {
 	public void setAddress(_009Address address) {
 		this.address = address;
 	}
- 
-    @Override
-    public String toString() {
-        return "Student [id=" + id + ", firstName=" + firstName + ", lastName="
-                + lastName + "]";
-    }
+
+	@Override
+	public String toString() {
+		return "_009Student [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + "]";
+	}
+
+//	@Override
+//	public String toString() {
+//		return "_009Student [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", address=" + address + "]";
+//	}
+	
 }
 
 @Entity
@@ -164,13 +115,8 @@ class _009Address {
     @Column(name = "COUNTRY")
     private String country;
     
-    @OneToOne
-    @PrimaryKeyJoinColumn
+    @OneToOne(mappedBy="address", cascade = CascadeType.ALL)
     private _009Student student;
-
-//	  Alternatively: 
-//    @OneToOne(mappedBy="address")
-//    private _016_Student_OneToOne_BiDirectional student;
     
     public _009Address() {
  
@@ -221,12 +167,18 @@ class _009Address {
     public void setCountry(String country) {
         this.country = country;
     }
+
+	@Override
+	public String toString() {
+		return "_009Address [id=" + id + ", street=" + street + ", city=" + city + ", country=" + country + ", student=" + student + "]";
+	}
  
-    @Override
-    public String toString() {
-        return "Address [id=" + id + ", street=" + street + ", city=" + city
-                + ", country=" + country + "]";
-    }     
+//    @Override
+//    public String toString() {
+//        return "Address [id=" + id + ", street=" + street + ", city=" + city + ", country=" + country + "]";
+//    }   
+    
+    
 }
 
 public class _009_OneToOne_BiDirectional {    
@@ -235,7 +187,8 @@ public class _009_OneToOne_BiDirectional {
 		SessionFactory sf = cfg.buildSessionFactory();
     	_009_OneToOne_BiDirectional demo = new _009_OneToOne_BiDirectional();
 		demo.insert(sf);
-		demo.select(sf);
+//		demo.select(sf);
+		demo.selectInverse(sf);
 	}
     
 	public void insert(SessionFactory sf){
@@ -267,9 +220,7 @@ public class _009_OneToOne_BiDirectional {
 		Transaction tx = session.beginTransaction();
 		try {
 			List<_009Student> students = (List<_009Student>)session.createQuery(" FROM _001._009Student").list();
-			for(_009Student student : students){
-				System.out.println(student.getFirstName() + " " + student.getAddress().toString());
-			}
+			System.out.println(students);
 		} catch (HibernateException e) {
 			e.printStackTrace();
 		}finally{
@@ -278,10 +229,35 @@ public class _009_OneToOne_BiDirectional {
 	}
 	/*
 	OUTPUT:
-	Hibernate: select stude0_.STUDENT_ID as STUDENT_1_1_, stude0_.FIRST_NAME as FIRST_NA2_1_, stude0_.LAST_NAME as LAST_NAM3_1_ from STUDENT stude0_
-	Hibernate: select addre0_.ADDRESS_ID as ADDRESS_1_0_0_, addre0_.CITY as CITY2_0_0_, addre0_.COUNTRY as COUNTRY3_0_0_, addre0_.STREET as STREET4_0_0_, 
-	stude1_.STUDENT_ID as STUDENT_1_1_1_, stude1_.FIRST_NAME as FIRST_NA2_1_1_, stude1_.LAST_NAME as LAST_NAM3_1_1_ from ADDRESS addre0_ left outer join S
-	TUDENT stude1_ on addre0_.ADDRESS_ID=stude1_.STUDENT_ID where addre0_.ADDRESS_ID=?
-	bimal Address [id=1, street=Fremont Blvd, city=Fremont, country=USA]
+	Hibernate: select studen0_.STUDENT_ID as STUDENT_1_1_, studen0_.FIRST_NAME as FIRST_NA2_1_, studen0_.LAST_NAME as LAST_NAM3_1_ from STUDENT studen0_
+	Hibernate: select addres0_.ADDRESS_ID as ADDRESS_1_0_0_, addres0_.CITY as CITY2_0_0_, addres0_.COUNTRY as COUNTRY3_0_0_, addres0_.STREET as STREET4_0_
+	0_, studen1_.STUDENT_ID as STUDENT_1_1_1_, studen1_.FIRST_NAME as FIRST_NA2_1_1_, studen1_.LAST_NAME as LAST_NAM3_1_1_ from ADDRESS addres0_ left oute
+	r join STUDENT studen1_ on addres0_.ADDRESS_ID=studen1_.STUDENT_ID where addres0_.ADDRESS_ID=?
+	
+	[_009Student [id=1, firstName=bimal, lastName=jain, address=Address [id=1, street=Fremont Blvd, city=Fremont, country=USA]]]
+	 */
+	
+	@SuppressWarnings("unchecked")
+	public void selectInverse(SessionFactory sf) throws IOException{
+		Session session = sf.openSession();
+		Transaction tx = session.beginTransaction();
+		try {
+			List<_009Address> addresses = (List<_009Address>)session.createQuery(" FROM _001._009Address").list();
+			System.out.println(addresses);
+		} catch (HibernateException e) {
+			e.printStackTrace();
+		}finally{
+			session.close();
+		}
+	}
+	/*
+	OUTPUT:
+	Hibernate: select addres0_.ADDRESS_ID as ADDRESS_1_0_, addres0_.CITY as CITY2_0_, addres0_.COUNTRY as COUNTRY3_0_, addres0_.STREET as STREET4_0_ from 
+	ADDRESS addres0_
+	Hibernate: select studen0_.STUDENT_ID as STUDENT_1_1_0_, studen0_.FIRST_NAME as FIRST_NA2_1_0_, studen0_.LAST_NAME as LAST_NAM3_1_0_, addres1_.ADDRESS
+	_ID as ADDRESS_1_0_1_, addres1_.CITY as CITY2_0_1_, addres1_.COUNTRY as COUNTRY3_0_1_, addres1_.STREET as STREET4_0_1_ from STUDENT studen0_ left oute
+	r join ADDRESS addres1_ on studen0_.STUDENT_ID=addres1_.ADDRESS_ID where studen0_.STUDENT_ID=?
+	
+	[_009Address [id=1, street=Fremont Blvd, city=Fremont, country=USA, student=_009Student [id=1, firstName=bimal, lastName=jain]]]
 	 */
 }

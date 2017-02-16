@@ -1,17 +1,45 @@
 /*
-In Bidirectional relationship, both side navigation is possible. For bidirectional relationships, we have a concept of ownership, means who is the owner of 
-this relationship. Put simply, who is responsible for updating the column in DB on which this relationship depends on.
-@JoinColumn is used to represent the owner of the relationship.
-mappedBy attribute are always put(annotated) on the inverse side of relation ship and specifies with it's attribute value, the owner of the relationship.
+1. In Bidirectional relationship, both side navigation is possible. For bidirectional relationships, we have a concept of ownership, means who is the owner 
+of this relationship. Put simply, who is responsible for updating the column in DB on which this relationship depends on.
 
-@OneToMany on list property here denotes that one DEPT can have multiple EMP. With EMP property defined in DEPT class, we can now navigate from DEPT to 
+2. @JoinColumn is used to represent the owner of the relationship.
+
+3. mappedBy attribute are always put on the inverse side of relationship. Here the relationship is managed by “dept” property of Emp class annotated with 
+@JoinColumn.
+
+4. @OneToMany on list property here denotes that one DEPT can have multiple EMP. With EMP property defined in DEPT class, we can now navigate from DEPT to 
 EMP. mappedBy says that it's the inverse side of relationship. 
-Also note the cascade attribute, which means the child object(EMP) will be persisted/updated/deleted automatically on subsequent persist/update/delete of 
-DEPT object (parent). No need to perform operation separately on EMP. 
 
+5. Note the cascade attribute, which means the child object(EMP) will be persisted/updated/deleted automatically on subsequent persist/update/delete of 
+DEPT object (parent). No need to perform operation separately on EMP. 
 [We can insert/update records from DEPT side as well, but there are lot of additional steps needed. Fewer steps are needed to maintain the relationship 
 from the EMP side. Remember that EMP is the relationship owner. So insert/update should be done from the EMP side. Also remember that Bidirectional
 relationship means you can do select from both side.]
+
+-----------
+DB DETAILS:
+-----------
+drop table EMP;
+drop table DEPT;
+
+CREATE TABLE DEPT (
+  DNO INT NOT NULL AUTO_INCREMENT,
+  DNAME VARCHAR(255) NOT NULL,
+  PRIMARY KEY (DNO)
+  );
+
+CREATE TABLE EMP (
+  ENO INT NOT NULL AUTO_INCREMENT,
+  DNO INT NOT NULL,
+  ENAME VARCHAR(15) NOT NULL,
+  EADDRESS VARCHAR(100) NOT NULL,
+  ESALARY INT,
+  PRIMARY KEY (ENO),
+  CONSTRAINT EMP_DEPT FOREIGN KEY (DNO) REFERENCES DEPT (DNO) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+select * from EMP;
+select * from DEPT;
 */
 
 package _001;
@@ -86,9 +114,18 @@ class _005Emp {
 		this.dept = dept;
 	}
 
-	public String toString(){
-		return this.eid + " " + this.dept + " " + this.name + " " + this.address + " " + this.salary;
+// this is needed if you do select from EMP side
+//	@Override
+//	public String toString() {
+//		return "_005Emp [eid=" + eid + ", dept=" + dept + ", name=" + name + ", address=" + address + ", salary=" + salary + "]";
+//	}
+
+// this is needed if you do select from DEPT side
+	@Override
+	public String toString() {
+		return "_005Emp [eid=" + eid + ", name=" + name + ", address=" + address + ", salary=" + salary + "]";
 	}
+	
 }
 
 @Entity
@@ -103,7 +140,8 @@ class _005Dept {
 	@Column(name = "DNAME")
 	String name;
 	
-	@OneToMany(mappedBy="dept", cascade=CascadeType.ALL)
+//	@OneToMany(mappedBy="dept", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy="dept")
 	List<_005Emp> empList;
 	
 	public _005Dept() {	}
@@ -122,10 +160,18 @@ class _005Dept {
 	}
 	public String getName() { return name; }
 	public void setName(String name) { this.name = name; }
-	
-	public String toString(){
-		return this.did + " " + this.name;
+
+// this is needed if you do select from DEPT side
+	@Override
+	public String toString() {
+		return "_005Dept [did=" + did + ", name=" + name + ", empList=" + empList + "]";
 	}
+	
+// this is needed if you do select from EMP side
+//	@Override
+//	public String toString() {
+//		return "_005Dept [did=" + did + ", name=" + name + "]";
+//	}
 }
 
 public class _005_ManyToOne_BiDirectional {
@@ -135,9 +181,9 @@ public class _005_ManyToOne_BiDirectional {
 		SessionFactory sf = cfg.buildSessionFactory();
 		_005_ManyToOne_BiDirectional demo = new _005_ManyToOne_BiDirectional();
 		demo.insertEmpToDept(sf);
-		demo.selectEmpToDept(sf);
+//		demo.selectEmpToDept(sf); //uncomment toString() as well.
 		demo.selectDeptToEmp(sf);
-		demo.insertDeptToEmp(sf);
+//		demo.insertDeptToEmp(sf);
 	}
 	
 	public void insertEmpToDept(SessionFactory sf){
@@ -182,7 +228,7 @@ public class _005_ManyToOne_BiDirectional {
 	Hibernate: select emp0_.ENO as ENO1_1_, emp0_.EADDRESS as EADDRESS2_1_, emp0_.DNO as DNO5_1_, emp0_.ENAME as ENAME3_1_, emp0_.ESALARY as ESALARY4_1_ from EMP emp0_
 	Hibernate: select dept0_.DNO as DNO1_0_0_, dept0_.DNAME as DNAME2_0_0_ from DEPT dept0_ where dept0_.DNO=?
 	
-	[1 1 Aladdin Product Group Bimal Pune 23456.0]
+	[_005Emp [eid=1, dept=_005Dept [did=1, name=Aladdin Product Group], name=Bimal, address=Pune, salary=23456.0]]
 	 */
 
 	@SuppressWarnings("unchecked")
@@ -192,8 +238,7 @@ public class _005_ManyToOne_BiDirectional {
 		try {
 			List<_005Dept> deptList = (List<_005Dept>)session.createQuery(" FROM _001._005Dept").list();
 			for(_005Dept dept : deptList){
-				System.out.println(dept);
-				System.out.println(dept.empList.toString());
+				System.out.println(dept.toString() + " " + dept.empList.toString());
 			}
 		} catch (HibernateException e) {
 			e.printStackTrace();
@@ -205,9 +250,12 @@ public class _005_ManyToOne_BiDirectional {
 	/*
 	OUTPUT:
 	Hibernate: select dept0_.DNO as DNO1_0_, dept0_.DNAME as DNAME2_0_ from DEPT dept0_
-	1 Aladdin Product Group
-	Hibernate: select emplist0_.DNO as DNO5_1_0_, emplist0_.ENO as ENO1_1_0_, emplist0_.ENO as ENO1_1_1_, emplist0_.EADDRESS as EADDRESS2_1_1_, emplist0_.DNO as DNO5_1_1_, emplist0_.ENAME as ENAME3_1_1_, emplist0_.ESALARY as ESALARY4_1_1_ from EMP emplist0_ where emplist0_.DNO=?
-	[1 1 Aladdin Product Group Bimal Pune 23456.0]
+	Hibernate: select emplist0_.DNO as DNO5_1_0_, emplist0_.ENO as ENO1_1_0_, emplist0_.ENO as ENO1_1_1_, emplist0_.EADDRESS as EADDRESS2_1_1_, emplist0_.
+	DNO as DNO5_1_1_, emplist0_.ENAME as ENAME3_1_1_, emplist0_.ESALARY as ESALARY4_1_1_ from EMP emplist0_ where emplist0_.DNO=?
+	
+	_005Dept [did=1, name=Aladdin Product Group, empList=[_005Emp [eid=1, name=Bimal, address=Pune, salary=23456.0]]] [_005Emp [eid=1, name=Bimal, address
+	=Pune, salary=23456.0]]
+
 	 */
 	
 	public void insertDeptToEmp(SessionFactory sf){

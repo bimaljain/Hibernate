@@ -1,19 +1,3 @@
-/*
-PURPOSE: Hibernate Many-To-Many Bidirectional mapping using annotation based configuration.
-
-	@ManyToMany(mappedBy="subjects")
-	private List<Student> students = new ArrayList<Student>();
-Nothing else changes.We added this property in Subject class to make the relationship bidirectional.You can now navigate from Subject to Student.mappedBy 
-attribute tells that this is the inverse side of relationship which is managed by “subjects” property of Student annotated with @JoinColumn.
-
-If you prefer to recall (as in Unidirectional) , owner side of relationship is defined in Student class as follows
-	@ManyToMany(cascade = CascadeType.ALL)
-	@JoinTable(name = "STUDENT_SUBJECT", 
-	    joinColumns = { @JoinColumn(name = "STUDENT_ID") }, 
-	    inverseJoinColumns = { @JoinColumn(name = "SUBJECT_ID") })
-	private List<Subject> subjects = new ArrayList<Subject>();
-
- */
 package _001;
 
 import java.io.IOException;
@@ -52,6 +36,7 @@ class _007Student {
     @Column(name = "LAST_NAME")
     private String lastName;
  
+    //owner side of the relationship
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "STUDENT_SUBJECT", 
              joinColumns = { @JoinColumn(name = "STUDENT_ID") }, 
@@ -120,11 +105,18 @@ class _007Student {
         return true;
     }
  
-    @Override
-    public String toString() {
-        return "Student [id=" + id + ", firstName=" + firstName + ", lastName="
-                + lastName + "]";
-    }
+    // this is needed to do select from Emp side
+	@Override
+	public String toString() {
+		return "_007Student [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", subjects="
+				+ subjects + "]";
+	}
+    
+    //this is needed to do select from Subject side
+//	@Override
+//	public String toString() {
+//		return "_007Student [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + "]";
+//	}
 }
 
 @Entity
@@ -139,6 +131,7 @@ class _007Subject {
     @Column(name = "SUBJECT_NAME")
     private String name;
     
+    //inverse side of relationship
     @ManyToMany(mappedBy="subjects")
     private List<_007Student> students = new ArrayList<_007Student>();
      
@@ -201,10 +194,17 @@ class _007Subject {
         return true;
     }
  
+     // this is needed to do select from Emp side
     @Override
     public String toString() {
         return "Subject [id=" + id + ", name=" + name + "]";
     }
+    
+    // this is needed to do select from Subject side
+//    @Override
+//	public String toString() {
+//		return "_007Subject [id=" + id + ", name=" + name + ", students=" + students + "]";
+//	}   
 }
 
 public class _007_ManyToMany_BiDirectional {
@@ -214,8 +214,8 @@ public class _007_ManyToMany_BiDirectional {
 		SessionFactory sf = cfg.buildSessionFactory();
     	_007_ManyToMany_BiDirectional demo = new _007_ManyToMany_BiDirectional();
 		demo.insert(sf);
-		demo.select(sf);
-		demo.inverseSelect(sf);
+		demo.select(sf); //uncomment toString() as well.
+//		demo.inverseSelect(sf);
 	}
     
 	public void insert(SessionFactory sf){
@@ -267,11 +267,8 @@ public class _007_ManyToMany_BiDirectional {
 		Session session = sf.openSession();
 		Transaction tx = session.beginTransaction();
 		try {
-			List<_007Student> students = 
-					(List<_007Student>)session.createQuery(" FROM _001._007Student").list();
-			for(_007Student student : students){
-				System.out.println(student.getFirstName() + " " + student.getSubjects().toString());
-			}
+			List<_007Student> students = (List<_007Student>)session.createQuery(" FROM _001._007Student").list();
+			System.out.println(students);
 		} catch (HibernateException e) {
 			e.printStackTrace();
 		}finally{
@@ -280,16 +277,16 @@ public class _007_ManyToMany_BiDirectional {
 	}
 	/*
 	OUTPUT:
-	Hibernate: select stude0_.STUDENT_ID as STUDENT_1_0_, stude0_.FIRST_NAME as FIRST_NA2_0_, stude0_.LAST_NAME as LAST_NAM3_0_ from STUDENT stude0_
-	Hibernate: select subjects0_.STUDENT_ID as STUDENT_1_1_0_, subjects0_.SUBJECT_ID as SUBJECT_2_1_0_, subje1_.SUBJECT_ID as SUBJECT_1_2_1_, subje1_.SUBJ
-	ECT_NAME as SUBJECT_2_2_1_ from STUDENT_SUBJECT subjects0_ inner join SUBJECT subje1_ on subjects0_.SUBJECT_ID=subje1_.SUBJECT_ID where subjects0_.STU
-	DENT_ID=?
-	Sam [Subject [id=1, name=Economics], Subject [id=2, name=Politics], Subject [id=3, name=Foreign Affairs]]
+	Hibernate: select studen0_.STUDENT_ID as STUDENT_1_0_, studen0_.FIRST_NAME as FIRST_NA2_0_, studen0_.LAST_NAME as LAST_NAM3_0_ from STUDENT studen0_
+	Hibernate: select subjects0_.STUDENT_ID as STUDENT_1_1_0_, subjects0_.SUBJECT_ID as SUBJECT_2_1_0_, subjec1_.SUBJECT_ID as SUBJECT_1_2_1_, subjec1_.SU
+	BJECT_NAME as SUBJECT_2_2_1_ from STUDENT_SUBJECT subjects0_ inner join SUBJECT subjec1_ on subjects0_.SUBJECT_ID=subjec1_.SUBJECT_ID where subjects0_
+	.STUDENT_ID=?
+	Hibernate: select subjects0_.STUDENT_ID as STUDENT_1_1_0_, subjects0_.SUBJECT_ID as SUBJECT_2_1_0_, subjec1_.SUBJECT_ID as SUBJECT_1_2_1_, subjec1_.SU
+	BJECT_NAME as SUBJECT_2_2_1_ from STUDENT_SUBJECT subjects0_ inner join SUBJECT subjec1_ on subjects0_.SUBJECT_ID=subjec1_.SUBJECT_ID where subjects0_
+	.STUDENT_ID=?
 	
-	Hibernate: select subjects0_.STUDENT_ID as STUDENT_1_1_0_, subjects0_.SUBJECT_ID as SUBJECT_2_1_0_, subje1_.SUBJECT_ID as SUBJECT_1_2_1_, subje1_.SUBJ
-	ECT_NAME as SUBJECT_2_2_1_ from STUDENT_SUBJECT subjects0_ inner join SUBJECT subje1_ on subjects0_.SUBJECT_ID=subje1_.SUBJECT_ID where subjects0_.STU
-	DENT_ID=?
-	Joshua [Subject [id=1, name=Economics], Subject [id=2, name=Politics]]
+	[_007Student [id=1, firstName=Sam, lastName=Disilva, subjects=[Subject [id=1, name=Economics], Subject [id=2, name=Politics], Subject [id=3, name=Foreign Affairs]]], 
+	_007Student [id=2, firstName=Joshua, lastName=Brill, subjects=[Subject [id=1, name=Economics], Subject [id=2, name=Politics]]]]
 	 */
 	
 	@SuppressWarnings("unchecked")
@@ -298,9 +295,7 @@ public class _007_ManyToMany_BiDirectional {
 		Transaction tx = session.beginTransaction();
 		try {
 			List<_007Subject> subjects = (List<_007Subject>)session.createQuery(" FROM _001._007Subject").list();
-			for(_007Subject subject : subjects){
-				System.out.println(subject.getName() + " " + subject.getStudents().toString());
-			}
+			System.out.println(subjects);
 		} catch (HibernateException e) {
 			e.printStackTrace();
 		}finally{
@@ -308,20 +303,19 @@ public class _007_ManyToMany_BiDirectional {
 		}
 	}
 	/*OUTPUT:
-	Hibernate: select subje0_.SUBJECT_ID as SUBJECT_1_2_, subje0_.SUBJECT_NAME as SUBJECT_2_2_ from SUBJECT subje0_
-	Hibernate: select students0_.SUBJECT_ID as SUBJECT_2_1_0_, students0_.STUDENT_ID as STUDENT_1_1_0_, stude1_.STUDENT_ID as STUDENT_1_0_1_, stude1_.FIRS
-	T_NAME as FIRST_NA2_0_1_, stude1_.LAST_NAME as LAST_NAM3_0_1_ from STUDENT_SUBJECT students0_ inner join STUDENT stude1_ on students0_.STUDENT_ID=stud
-	e1_.STUDENT_ID where students0_.SUBJECT_ID=?
-	Economics [Student [id=1, firstName=Sam, lastName=Disilva], Student [id=2, firstName=Joshua, lastName=Brill]]
+	Hibernate: select subjec0_.SUBJECT_ID as SUBJECT_1_2_, subjec0_.SUBJECT_NAME as SUBJECT_2_2_ from SUBJECT subjec0_
+	Hibernate: select students0_.SUBJECT_ID as SUBJECT_2_1_0_, students0_.STUDENT_ID as STUDENT_1_1_0_, studen1_.STUDENT_ID as STUDENT_1_0_1_, studen1_.FI
+	RST_NAME as FIRST_NA2_0_1_, studen1_.LAST_NAME as LAST_NAM3_0_1_ from STUDENT_SUBJECT students0_ inner join STUDENT studen1_ on students0_.STUDENT_ID=
+	studen1_.STUDENT_ID where students0_.SUBJECT_ID=?
+	Hibernate: select students0_.SUBJECT_ID as SUBJECT_2_1_0_, students0_.STUDENT_ID as STUDENT_1_1_0_, studen1_.STUDENT_ID as STUDENT_1_0_1_, studen1_.FI
+	RST_NAME as FIRST_NA2_0_1_, studen1_.LAST_NAME as LAST_NAM3_0_1_ from STUDENT_SUBJECT students0_ inner join STUDENT studen1_ on students0_.STUDENT_ID=
+	studen1_.STUDENT_ID where students0_.SUBJECT_ID=?
+	Hibernate: select students0_.SUBJECT_ID as SUBJECT_2_1_0_, students0_.STUDENT_ID as STUDENT_1_1_0_, studen1_.STUDENT_ID as STUDENT_1_0_1_, studen1_.FI
+	RST_NAME as FIRST_NA2_0_1_, studen1_.LAST_NAME as LAST_NAM3_0_1_ from STUDENT_SUBJECT students0_ inner join STUDENT studen1_ on students0_.STUDENT_ID=
+	studen1_.STUDENT_ID where students0_.SUBJECT_ID=?
 	
-	Hibernate: select students0_.SUBJECT_ID as SUBJECT_2_1_0_, students0_.STUDENT_ID as STUDENT_1_1_0_, stude1_.STUDENT_ID as STUDENT_1_0_1_, stude1_.FIRS
-	T_NAME as FIRST_NA2_0_1_, stude1_.LAST_NAME as LAST_NAM3_0_1_ from STUDENT_SUBJECT students0_ inner join STUDENT stude1_ on students0_.STUDENT_ID=stud
-	e1_.STUDENT_ID where students0_.SUBJECT_ID=?
-	Politics [Student [id=1, firstName=Sam, lastName=Disilva], Student [id=2, firstName=Joshua, lastName=Brill]]
-	
-	Hibernate: select students0_.SUBJECT_ID as SUBJECT_2_1_0_, students0_.STUDENT_ID as STUDENT_1_1_0_, stude1_.STUDENT_ID as STUDENT_1_0_1_, stude1_.FIRS
-	T_NAME as FIRST_NA2_0_1_, stude1_.LAST_NAME as LAST_NAM3_0_1_ from STUDENT_SUBJECT students0_ inner join STUDENT stude1_ on students0_.STUDENT_ID=stud
-	e1_.STUDENT_ID where students0_.SUBJECT_ID=?
-	Foreign Affairs [Student [id=1, firstName=Sam, lastName=Disilva]]
+	[_007Subject [id=1, name=Economics, students=[_007Student [id=1, firstName=Sam, lastName=Disilva], _007Student [id=2, firstName=Joshua, lastName=Brill]]], 
+	_007Subject [id=2, name=Politics, students=[_007Student [id=1, firstName=Sam, lastName=Disilva], _007Student [id=2, firstName=Joshua, lastName=Brill]]], 
+	_007Subject [id=3, name=Foreign Affairs, students=[_007Student [id=1, firstName=Sam, lastName=Disilva]]]]
 	 */
 }
