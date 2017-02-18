@@ -2,8 +2,8 @@
 ------------------------------------
 Why Object Relational Mapping (ORM)?
 ------------------------------------
-When we work with an object-oriented system, there's a mismatch between the object model and the relational database. Consider the following Employee Class
-and the EMPLOYEE table. Also consider that the Employee objects need to be stored and retrieved into the EMPLOYEE table:	
+When we work with an object-oriented system, there's a mismatch between the object model and the relational database. Consider the following Employee 
+Class and the EMPLOYEE table. Also consider that the Employee objects need to be stored and retrieved into the EMPLOYEE table:	
 
 	public class Employee {
 	   private int id;
@@ -23,21 +23,22 @@ and the EMPLOYEE table. Also consider that the Employee objects need to be store
 	   id INT NOT NULL auto_increment,
 	   first_name VARCHAR(20) default NULL,
 	   salary     INT  default NULL,
-	   PRIMARY KEY (id)
-	
+	   PRIMARY KEY (id)	
 	);
 
 Loading and storing objects in a relational database exposes us to the following mismatch problems:	
 Granularity: Sometimes you will have an object model which has more classes than the number of corresponding tables in the database.
 Inheritance: RDBMSs do not define anything similar to Inheritance which is a natural paradigm in object-oriented programming languages.
 Identity: A RDBMS defines exactly one notion of 'sameness': the primary key. Java, however, defines both object identity (a==b) and object equality 
-	(a.equals(b)).
+(a.equals(b)).
 Associations: Object-oriented languages represent associations using object references whereas an RDBMS represents an association as a foreign key column.
 Navigation: RDBMSs represent data in a tabular format whereas object-oriented languages represent it as an interconnected graph of objects. The ways you
- 	access objects in Java and in a RDBMS are fundamentally different.
+access objects in Java and in a RDBMS are fundamentally different.
 The ORM is the solution to handle all the above mismatches.	
  
-ORM Overview: 
+-------------
+ORM Overview:
+------------- 
 ORM is a programming technique for converting data between relational databases and object oriented programming languages. An ORM system has following 
 advantages over plain JDBC.
 · No need to deal with the database implementation.
@@ -56,11 +57,11 @@ described as follows:
 1. On Application startup, hibernate reads it configuration file(hibernate.cfg.xml or hibernate.properties) which contains information required to make 
 the connection with underlying database and mapping information. Based on this information, hibernate creates Configuration Object , which in turns creates
 SessionFactory which acts as singleton for the whole application.
-2. Hibernate creates instances of entity classes.Entity classes are java classes which are mapped to the database table using metadata(XML/Annotaitons).
+2. Hibernate creates instances of entity classes. Entity classes are java classes which are mapped to the database table using metadata(XML/Annotaitons).
 These instances are called transient objects as they are not yet persisted in database.
 3. To persist an object, application ask for a Session from SessionFactory which is a factory for Session.Session represent a physical database connection.
 4. Application then starts the transaction to make the unit of work atomic, &  uses Session API’s to finally persist the entity instance in database.Once 
-the entity instance persisted in database, it’s  known as  persistent object as it represent a row in database table.Application then closes/commits the 
+the entity instance persisted in database, it’s known as persistent object as it represent a row in database table. Application then closes/commits the 
 transaction followed by session close.
 5. Once the session gets closed , the entity instance becomes detatched which means it still contains data but no more attached to the database table & no 
 more under the management of Hibernate. Detatched objects can again become persistent when associated with a new Session, or can be garbage collected once 
@@ -82,9 +83,9 @@ Session (org.hibernate.Session): A Session is used to get a physical connection 
 read, update and delete operations for instances of mapped entity classes. Since it’s not thread-safe, it should not be long-lived and each 
 thread/transaction should obtain its own instance from a SessionFactory. Instances may exist in one of the following three states at a given point in time:
 1. transient: A new instance of a persistent class which is not associated with a Session and has no representation in the database and no identifier 
-	value, is considered transient by Hibernate.
+value, is considered transient by Hibernate.
 2. persistent: You can make a transient instance persistent by associating it with a Session. A persistent instance has a representation in the database, 
-	an identifier value and is associated with a Session.
+an identifier value and is associated with a Session.
 3. detached: Once we close the Hibernate Session, the persistent instance will become a detached instance.
 
 Transaction (org.hibernate.Transaction): It’s a single-thread object used by the application to define units of work. A transaction is associated with a 

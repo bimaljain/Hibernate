@@ -74,27 +74,21 @@ public class _002_SecondLevelCache {
 		
 		System.out.println("2-Session");
 		session = sf.openSession();
-		tx = session.beginTransaction();
 		_002Emp employees=(_002Emp)session.get(_002Emp.class, new Integer(1));
 		System.out.println(employees);
-		tx.commit();
 		session.close();
 		
 		System.out.println("3-Session");
 		session = sf.openSession();
-		tx = session.beginTransaction();
 		employees=(_002Emp)session.get(_002Emp.class, new Integer(1));
 		employees.setName("BJ");
 		System.out.println(employees);
-		tx.commit();
 		session.close();
 		
 		System.out.println("4-Session");
 		session = sf.openSession();
-		tx = session.beginTransaction();
 		employees=(_002Emp)session.get(_002Emp.class, new Integer(1));
 		System.out.println(employees);
-		tx.commit();
 		session.close();
 		
 	}

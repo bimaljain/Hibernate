@@ -14,6 +14,7 @@ Make EVERY query cacheable (not just the first query)
 - If the query cache does not have value, go to the DB, pull up the records and set it in the query cache.
 - If the query cache does have value, pull up the records from the query cache.
 
+Below example has NO query caching.
  */
 package _001;
 

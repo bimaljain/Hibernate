@@ -7,7 +7,7 @@ much as possible to give a better performance. Caching is important to Hibernate
 
 First-level cache: 
 The first-level cache is the Session cache and is a mandatory cache through which all requests must pass. The Session cache keeps an object under its 
-own power before committing it to the database. If you issue multiple updates to an object, Hibernate tries to delay doing the update as long as possible 
+own control before committing it to the database. If you issue multiple updates to an object, Hibernate tries to delay doing the update as long as possible 
 to reduce the number of update SQL statements issued. If you close the session, all the objects being cached are lost and either persisted or updated in 
 the database.
 
@@ -17,15 +17,15 @@ session, we have to load it again in the cache. What if we need some object acro
 - Across sessions in an application
 - Across applications (provided they are all talking to the same data & all are using hibernate)
 - Across clusters (provided they are all talking to the same data & all are using hibernate)
-If any application is not using hibernate, it will not be aware of the cache data and will directly talk to DB and dirtying the data. This will make 
-hibernate cache invalid, as hibernate would not know about this change. But if we are configuring 2nd level cache across applications, hibernate will take 
-care of these issues.
+If any part of the application is not using hibernate, it will not be aware of the cache data and will directly talk to DB and dirtying the data. This will 
+make hibernate cache invalid, as hibernate would not know about this change. But if we are configuring 2nd level cache across application, hibernate will 
+take care of these issues.
 
 2. Second level cache is an optional cache and first-level cache will always be consulted before any attempt is made to locate an object in the second-level 
 cache. The second-level cache can be configured on a per-class and per-collection basis and mainly responsible for caching objects across sessions. 
 
 3. Hibernate uses first-level cache by default and you have nothing to do to use first-level cache. To use 2nd level cache: 
-Include cache provider jar into your project (3rd party cache providers)
+Include cache provider jar & related configuration into your project (3rd party cache providers)
 Configure hibernate configuration file
 Update the entity to make it cacheable & provide caching strategy (annotations are hibernate specific). Objects configured to cache goes to 2nd level cache.
 
@@ -142,27 +142,21 @@ public class _001_NoCache {
 		
 		System.out.println("2-Session");
 		session = sf.openSession();
-		tx = session.beginTransaction();
 		List<_001Emp> employees = (List<_001Emp>)session.createQuery(" FROM _001Emp").list();
 		System.out.println(employees);
-		tx.commit();
 		session.close();
 		
 		System.out.println("3-Session");
 		session = sf.openSession();
-		tx = session.beginTransaction();
 		employees = (List<_001Emp>)session.createQuery(" FROM _001Emp").list();
 		employees.get(employees.size()-1).setName("BJ");
 		System.out.println(employees);
-		tx.commit();
 		session.close();
 		
 		System.out.println("4-Session");
 		session = sf.openSession();
-		tx = session.beginTransaction();
 		employees = (List<_001Emp>)session.createQuery(" FROM _001Emp").list();
 		System.out.println(employees);
-		tx.commit();
 		session.close();
 		
 	}

@@ -17,7 +17,7 @@ We can do an update in create flow or in read flow, as long as the object is in 
 
 Delete:
 Object is in persistent state either by session.save() or session.get().
-Session.delete() moves the persitent object to transient state.
+Session.delete() moves the persistent object to transient state.
 
 DROP TABLE EMP;
 
@@ -107,7 +107,8 @@ public class _000_ObjectState {
 		
 		System.out.println();
 		//detached --> persistent
-		//Multiple changes made once the object is attached to a session. But there is only one update query, since hibernate is tracking all the changes in the cache
+		//Multiple changes made once the object is attached to a session. But there is only one update query, since hibernate is tracking all the changes 
+		//in the cache
 		session = sf.openSession();
 		tx = session.beginTransaction();
 		session.update(emp);
@@ -122,15 +123,8 @@ public class _000_ObjectState {
 	/*
 	OUTPUT:
 	Hibernate: insert into EMP (EADDRESS, ENAME, ESALARY) values (?, ?, ?)
-	Hibernate: select emp0_.ENO as ENO1_0_0_, emp0_.EADDRESS as EADDRESS2_0_0_, emp0_.ENAME as ENAME3_0_0_, emp0_.ESALARY as ESALARY4_0_0_ from EMP emp0_ where emp0_.ENO=?
 	
-	Change made while object was detached
-	Hibernate: update EMP set EADDRESS=?, ENAME=?, ESALARY=? where ENO=?
-	
-	NO change while object was detached
-	Hibernate: update EMP set EADDRESS=?, ENAME=?, ESALARY=? where ENO=?
-	
-	Multiple changes done, but only one update SQL
+	//Multiple changes done, but only one update SQL
 	Hibernate: update EMP set EADDRESS=?, ENAME=?, ESALARY=? where ENO=?
 	 */
 }
