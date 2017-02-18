@@ -102,7 +102,7 @@ class _009Address {
 	
 	@Id
 	@GeneratedValue(generator="gen")
-    @GenericGenerator(name="gen", strategy="foreign",parameters=@Parameter(name="property", value="student"))
+    @GenericGenerator(name="gen", strategy="foreign",parameters=@Parameter(name="property", value="studentx"))
     @Column(name = "ADDRESS_ID")
     private long id;
  
@@ -116,7 +116,7 @@ class _009Address {
     private String country;
     
     @OneToOne(mappedBy="address", cascade = CascadeType.ALL)
-    private _009Student student;
+    private _009Student studentx;
     
     public _009Address() {
  
@@ -129,11 +129,11 @@ class _009Address {
     }
  
     public _009Student getStudent() {
-		return student;
+		return studentx;
 	}
 
 	public void setStudent(_009Student student) {
-		this.student = student;
+		this.studentx = student;
 	}
 
 	public long getId() {
@@ -170,7 +170,7 @@ class _009Address {
 
 	@Override
 	public String toString() {
-		return "_009Address [id=" + id + ", street=" + street + ", city=" + city + ", country=" + country + ", student=" + student + "]";
+		return "_009Address [id=" + id + ", street=" + street + ", city=" + city + ", country=" + country + ", student=" + studentx + "]";
 	}
  
 //    @Override

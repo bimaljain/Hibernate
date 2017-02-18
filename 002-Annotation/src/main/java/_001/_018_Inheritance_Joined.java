@@ -1,7 +1,7 @@
-/* 
-Joined strategy is again TablePerClass strategy.
-But this is strategy creates more normalized tables than TablePerClass strategy, since the parent columns are not copied to each child tables
-We will have to do a join to get the entire data as:
+/*
+1. Joined strategy is again TablePerClass strategy. But this is strategy creates more normalized tables than TablePerClass strategy, since the parent columns 
+are not copied to each child tables.
+2. We will have to do a join to get the entire data as:
 select * from table1 join table2 on table1.id=table2.id
 
 drop table VEHICLE;
@@ -27,7 +27,6 @@ CREATE TABLE TWO_WHEELER (
 select * from VEHICLE;
 select * from FOUR_WHEELER;
 select * from TWO_WHEELER;
-
 */
 
 package _001;

@@ -1,7 +1,6 @@
-/* 
+/*
 Default class inheritance mapping strategy. Its one common table per class hierarchy
 Discriminator column maintains the actual class name. This column tells you what kind of object the row represents.
-
 
 drop table VEHICLE;
 

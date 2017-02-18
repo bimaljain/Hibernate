@@ -1,9 +1,14 @@
-/* 
+/*
+----------------------------------
 Hibernate Session get() vs load():
-Hibernate Session provide different methods to fetch data from database. Two of them are – get() and load(). 
+----------------------------------
+Hibernate Session provide different methods to fetch data from database. Two of them are: get() and load(). 
 
-At first look both get() and load() seems similar because both of them fetch the data from database, however there are few differences between them, let’s look at them with a simple example.
-
+At first look both get() and load() seems similar because both of them fetch the data from database, however there are few differences between them.
+get() returns the object by fetching it from database or from hibernate cache whereas load() just returns the reference of an object that might not 
+actually exists, it loads the data from database or cache only when you access other properties of the object. 
+get() loads the data as soon as it's called whereas load() returns a proxy object and loads data only when it's actually required, so load() is 
+better because it support lazy loading.
 */
 
 package _020_Misc;
@@ -54,6 +59,7 @@ public class _002_GetVsLoad{
 		/* OUTPUT:
 		Hibernate: insert into DEPT (DNAME) values (?)
 		Hibernate: insert into EMP (EADDRESS, DNO, ENAME, ESALARY) values (?, ?, ?, ?)
+		
 		Hibernate: select emp0_.ENO as ENO1_1_0_, emp0_.EADDRESS as EADDRESS2_1_0_, emp0_.DNO as DNO5_1_0_, emp0_.ENAME as ENAME3_1_0_, emp0_.ESALARY 
 		as ESALARY4_1_0_, dept1_.DNO as DNO1_0_1_, dept1_.DNAME as DNAME2_0_1_ 
 		from EMP emp0_ inner join DEPT dept1_ on emp0_.DNO=dept1_.DNO 
@@ -69,15 +75,9 @@ public class _002_GetVsLoad{
 		where emp0_.ENO=?
 		Employee ID= Bimal
 		Employee load Details:: 1 46 Aladdin Product Group Bimal Pune 23456.0
-		
-		From the output it’s clear that get() returns the object by fetching it from database or from hibernate cache whereas load() just returns the 
-		reference of an object that might not actually exists, it loads the data from database or cache only when you access other properties of the 
-		object. 
-		
-		get() loads the data as soon as it’s called whereas load() returns a proxy object and loads data only when it’s actually required, so load() is better because it support lazy loading.
 		*/
 				
-		//Now let’s try to fetch data that doesn’t exists in the database.
+		//Now let's try to fetch data that doesn't exists in the database.
 		
 		session = sf.openSession();
 		_002Emp emp3 = (_002Emp) session.get(_002Emp.class, new Integer(100));

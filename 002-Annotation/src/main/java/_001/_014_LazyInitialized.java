@@ -1,4 +1,4 @@
-/* 
+/*
 ----------------------------
 Lazy & Eager Initialization:
 ----------------------------
@@ -37,6 +37,7 @@ package _001;
 import java.io.IOException;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -62,7 +63,7 @@ class _014Emp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	int eid;
 	
-	@ManyToOne(optional = false, fetch=FetchType.LAZY)
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.LAZY)
     @JoinColumn(name="DNO")
 	_014Dept dept;
 	
@@ -153,7 +154,6 @@ class _014_LazyInitialized{
 		try {
 			_014Dept dept = new _014Dept("Aladdin Product Group");
 			_014Emp emp = new _014Emp(dept, "Bimal","Pune",23456);
-			session.save(dept);
 			session.save(emp);
 			tx.commit();
 		} catch (HibernateException e) {

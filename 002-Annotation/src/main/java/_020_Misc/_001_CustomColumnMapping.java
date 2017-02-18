@@ -1,18 +1,21 @@
-/* 
-Bydefault, all the member variables of the entity will be persisted by hibernate. You can choose to skip any particular member variable in 2 ways:
+/*
+1. Bydefault, all the member variables of the entity will be persisted by hibernate. You can choose to skip any particular member variable in 2 ways:
 - Mark the member variable as transient or static
 - Use @Transient on top of the member variable.
- 
-The datatype conversion from Java datatype to DB datatype is also done automatically by hibernate. You can control this to override the default 
+
+2. The datatype conversion from Java datatype to DB datatype is also done automatically by hibernate. You can control this to override the default 
 conversion behavior. For example the java Calender object is converted to timestamp (without timezone) in the DB. What if you want to save the date 
 alone or time alone. Use:
 @Temporal(TemporalType.DATE)
 @Temporal(TemporalType.TIME)
- 
-Hibernate converts String to varchar(255). What if your String object has more than 255 characters. Use:
-@Lob on top of the member variable. In that case, hibernate choses either Clob or Blob for datatype conversion. If the member variable is a String, 
-Hibernate converts it to Clob, and if the member variable is a byte array, hibernate will choose Blob.
 
+3. Hibernate converts String to varchar(255). What if your String object has more than 255 characters. Use @Lob on top of the member variable. In that case, 
+hibernate choses either Clob or Blob for datatype conversion. If the member variable is a String, Hibernate converts it to Clob, and if the member variable 
+is a byte array, hibernate will choose Blob.
+
+-----------
+DB DETAILS:
+-----------
 DROP TABLE EMP;
 
 CREATE TABLE EMP (

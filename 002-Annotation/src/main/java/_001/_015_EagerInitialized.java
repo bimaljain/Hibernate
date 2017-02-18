@@ -1,4 +1,4 @@
-/* 
+/*
 drop table EMP;
 drop table DEPT;
 
@@ -27,6 +27,7 @@ package _001;
 import java.io.IOException;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -52,7 +53,7 @@ class _015Emp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	int eid;
 	
-	@ManyToOne(optional = false, fetch=FetchType.EAGER)
+	@ManyToOne(cascade=CascadeType.ALL, fetch=FetchType.EAGER)
     @JoinColumn(name="DNO")
 	_015Dept dept;
 	
@@ -142,7 +143,6 @@ public class _015_EagerInitialized{
 		try {
 			_015Dept dept = new _015Dept("Aladdin Product Group");
 			_015Emp emp = new _015Emp(dept, "Bimal","Pune",23456);
-			session.save(dept);
 			session.save(emp);
 			tx.commit();
 		} catch (HibernateException e) {

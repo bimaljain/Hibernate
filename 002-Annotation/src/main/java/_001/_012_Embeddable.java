@@ -1,9 +1,8 @@
 /*
 Entity Object: These objects have business value on their own.
-Value Object:These objects does not have value on their own, and are only there to provide value to other entity.
-@Embeddable & @Embedded:These annotations tells hibernate that the object needs to be embedded in some other entity and not to create a separate 
+Value Object: These objects does not have value on their own, and are only there to provide value to other entity.
+@Embeddable & @Embedded: These annotations tells hibernate that the object needs to be embedded in some other entity and not to create a separate 
 table for this. In other words, this annotation tells hibernate that this class is not an entity.
-
 
 DROP TABLE STUDENT;
 
@@ -103,8 +102,7 @@ class _012Student {
      
     @Override
 	public String toString() {
-		return "_022_Student_Embeddable [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName
-				+ ", address=" + address + "]";
+		return "_022_Student_Embeddable [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", address=" + address + "]";
 	}
 
 }

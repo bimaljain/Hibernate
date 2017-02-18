@@ -1,13 +1,22 @@
-/* 
-Named Query& Named Native Query
+/*
+--------------------------------
+Named Query& Named Native Query:
+--------------------------------
 1. Queries may be expressed in native SQL. The result of a native SQL query may consist of entities, scalar values, or a combination of the two.
-2. When multiple entities are returned by a SQL query, the entities must be specified in a @SqlResultSetMapping metadata definition. This result set mapping metadata can then be used by the persistence provider runtime to map the JDBC results into the expected objects.If the results of the query are limited to entities of a SINGLE entity class, a simpler form may be used and @SqlResultSetMapping metadata is not required.
-3. When an entity is being returned, the SQL statement should select ALL of the columns that are mapped to the entity object. This should include foreign key columns to related entities. The results obtained when insufficient data is available are undefined.
+2. When multiple entities are returned by a SQL query, the entities must be specified in a @SqlResultSetMapping metadata definition. This result set 
+mapping metadata can then be used by the persistence provider runtime to map the JDBC results into the expected objects.If the results of the query are 
+limited to entities of a SINGLE entity class, a simpler form may be used and @SqlResultSetMapping metadata is not required.
+3. When an entity is being returned, the SQL statement should select ALL of the columns that are mapped to the entity object. This should include foreign 
+key columns to related entities. The results obtained when insufficient data is available are undefined.
 4. Its best practice to write all the queries at a common place for easy maintenance. Named Query allows to write queries at the entity level.
-5. It’s a good practice to use entityName in front of the named query.
-6. Query can be HQL (using @NamedQuery) or SQL (using @NamedNativeQuery). These annotations are placed below @Entity, and both takes 2 parameters, name and query. Incase of @NamedNativeQuery, supply the entity class as well using resultClass. This is optional. But it helps you to easily cast it once you get the resultset. This is not required in HQL since it already knows about the class.
+5. It's a good practice to use entityName in front of the named query.
+6. Query can be HQL (using @NamedQuery) or SQL (using @NamedNativeQuery). These annotations are placed below @Entity, and both takes 2 parameters, name 
+and query. Incase of @NamedNativeQuery, supply the entity class as well using resultClass. This is optional. But it helps you to easily cast it once you 
+get the resultset. This is not required in HQL since it already knows about the class.
 
-
+-----------
+DB DETAILS:
+-----------
 CREATE TABLE DEPT (
   DNO INT NOT NULL AUTO_INCREMENT,
   DNAME VARCHAR(255) NOT NULL,
@@ -26,7 +35,6 @@ CREATE TABLE EMP (
 
 select * from EMP;
 select * from DEPT;
-
 */
 
 package _001;
@@ -126,15 +134,13 @@ public class _021_NamedQuery{
 }
 
 @Entity
-@NamedQueries({
-	
+@NamedQueries({	
 @NamedQuery(name="emp.named.query1", query = "from _021Emp where id=1"),
 @NamedQuery(name="emp.named.query2", query = "select name, salary from _021Emp where id=2"),
 @NamedQuery(name="emp.named.query3", query = "select count(*) from _021Emp")
 })
 
 @NamedNativeQueries({
-
 @NamedNativeQuery(name="emp.native.named.query2", 
 	query="SELECT * FROM EMP WHERE ENO=1", resultClass=_021Emp.class),
 
@@ -159,7 +165,7 @@ public class _021_NamedQuery{
 @NamedNativeQuery(name="emp.native.named.query8", 
 	query="SELECT SUM(ESALARY) as ctc FROM EMP", resultSetMapping="rsMetadata8"),
 
-//DON’T USE THIS APPROACH
+//DON'T USE THIS APPROACH
 @NamedNativeQuery(name="emp.native.named.query1", 
 	query="SELECT EMP.*, ADR.* FROM EMPLOYEE EMP, ADDRESS ADR WHERE EMP.EMP_ID=ADR.EMP_ID AND EMP.EMP_ID=1 ", resultClass=_021Emp.class)
 })
@@ -265,7 +271,6 @@ class _021Dept {
 }
 
 /*OUTPUT
-
 ------------
 LAZY OUTPUT:
 ------------
