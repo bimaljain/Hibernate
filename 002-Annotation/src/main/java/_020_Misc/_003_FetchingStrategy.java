@@ -26,9 +26,9 @@ FetchMode.JOIN, however, doesn't make sense with FetchType.LAZY. It's always Fet
 Batch size is an additional optimization for FetchMode.SELECT, so that it should be configured by its own annotation (@BatchSize) and has nothing to 
 do with FetchMode enumeration itself.Let's consider the below example where a stock has many stock daily records.
 
-------------------------
-@Fetch(FetchMode.SELECT)
-------------------------
+-------------------------
+@Fetch(FetchMode.SELECT):
+-------------------------
 This is the default fetching strategy. It enables the lazy loading of all its related collections.
 
 Hibernate generated two select statements
